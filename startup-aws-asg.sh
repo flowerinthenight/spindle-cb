@@ -1,5 +1,5 @@
 #!/bin/bash
-sudo yum install -y gcc git
+yum install -y gcc git
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 git clone https://github.com/aws/clock-bound
 cd clock-bound/clock-bound-d/
