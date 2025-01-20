@@ -16,7 +16,7 @@ $ aws ec2 create-launch-template \
 # Create the ASG:
 $ aws autoscaling create-auto-scaling-group \
   --auto-scaling-group-name spindle-asg \
-  --launch-template LaunchTemplateName=zgroup-lt,Version='1' \
+  --launch-template LaunchTemplateName=spindle-lt,Version='1' \
   --min-size 1 \
   --max-size 1 \
   --availability-zones {target-zone}
