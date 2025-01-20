@@ -1,4 +1,8 @@
 #!/bin/bash
+# echo '' >> /etc/chronyd.conf
+# echo 'Ref: https://github.com/aws/clock-bound/tree/main/clock-bound-d' >> /etc/chronyd.conf
+# echo 'maxclockerror 50' >> /etc/chronyd.conf
+sudo yum install -y gcc
 mkdir /opt/spindle/ && cd /opt/spindle/
 # wget https://github.com/flowerinthenight/zgroup/releases/download/v0.3.2/zgroup-v0.3.2-x86_64-linux.tar.gz
 # tar -xzvf zgroup-v0.3.2-x86_64-linux.tar.gz
