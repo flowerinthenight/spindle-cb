@@ -4,7 +4,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 git clone https://github.com/aws/clock-bound
 cd clock-bound/clock-bound-d/
 /root/.cargo/bin/cargo build --release
-echo 'Ref: https://github.com/aws/clock-bound/tree/main/clock-bound-d' >> /etc/chrony.d/clockbound.conf
+echo '# Ref: https://github.com/aws/clock-bound/tree/main/clock-bound-d' >> /etc/chrony.d/clockbound.conf
 echo 'maxclockerror 50' >> /etc/chrony.d/clockbound.conf
 systemctl restart chronyd
 systemctl status chronyd
