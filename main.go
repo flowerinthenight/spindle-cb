@@ -20,7 +20,7 @@ func main() {
 
 	defer f.Close()
 
-	m, err := mmap.Map(f, mmap.RDWR, 0)
+	m, err := mmap.Map(f, mmap.RDONLY, 0)
 	if err != nil {
 		log.Println("Map failed:", err)
 		return
