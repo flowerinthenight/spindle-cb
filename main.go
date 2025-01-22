@@ -40,9 +40,7 @@ func main() {
 			case <-ticker.C:
 			}
 
-			defer func(s time.Time) {
-				log.Println("clockbound took", time.Since(s))
-			}(time.Now())
+			start := time.Now()
 
 			log.Printf("len: %d\n", len(m))
 			log.Printf("%X\n", m)
@@ -110,6 +108,8 @@ func main() {
 			// log.Println("Earliest:", now.Bound.Earliest)
 			// log.Println("Latest:  ", now.Bound.Latest)
 			// log.Println("Range:   ", now.Bound.Latest.Sub(now.Bound.Earliest))
+
+			log.Println("clockbound took", time.Since(start))
 		}
 	}()
 
