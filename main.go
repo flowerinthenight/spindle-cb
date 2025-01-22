@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/binary"
 	"log"
 	"os"
 	"os/signal"
@@ -39,7 +40,8 @@ func main() {
 			case <-ticker.C:
 			}
 
-			log.Printf("magic: %X\n", m[:8])
+			magic := binary.BigEndian.Uint64(m[:8])
+			log.Printf("magic: %X\n", magic)
 			log.Printf("%X\n", m)
 
 			// now, err := c.Now()
