@@ -41,6 +41,8 @@ func main() {
 			}
 
 			log.Printf("len: %d\n", len(m))
+			log.Printf("%X\n", m)
+
 			size := binary.LittleEndian.Uint32(m[8:12])
 			log.Printf("size: 0x%X %d\n", size, size)
 
@@ -55,10 +57,13 @@ func main() {
 			asof_ns := binary.LittleEndian.Uint64(m[24:32])
 			log.Printf("as-of-ts (ns): 0x%X %d\n", asof_ns, asof_ns)
 
+			va_s := binary.LittleEndian.Uint64(m[32:40])
+			log.Printf("void-after-ts (s): 0x%X %d\n", va_s, va_s)
+			va_ns := binary.LittleEndian.Uint64(m[40:48])
+			log.Printf("void-after-ts (ns): 0x%X %d\n", va_ns, va_ns)
+
 			ts := time.Unix(int64(asof_s), int64(asof_ns))
 			log.Printf("ts: %v %v\n", ts.Format(time.RFC3339), ts.Format(time.RFC3339Nano))
-
-			log.Printf("%X\n", m)
 
 			// now, err := c.Now()
 			// if err != nil {
