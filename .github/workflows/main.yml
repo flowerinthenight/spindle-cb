@@ -27,6 +27,12 @@ jobs:
       run: go test -v ./...
 
     - name: Build binary
+      run: go build -v
+
+    - name: Release from tags
+      if: startsWith(github.event.ref, 'refs/tags/v')
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
-        go build -v
-        ls -laF
+        tar czvf spindle-${GITHUB_REF_NAME}-x86_64-linux.tar.gz spindle
+        gh release create ${GITHUB_REF_NAME} ./*.tar.gz --generate-notes
