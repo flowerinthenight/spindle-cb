@@ -40,9 +40,9 @@ func main() {
 			case <-ticker.C:
 			}
 
-			magic := binary.BigEndian.Uint64(m[:8])
+			magic := binary.LittleEndian.Uint64(m[:8])
 			buf := make([]byte, 8)
-			binary.BigEndian.PutUint64(buf, magic)
+			binary.LittleEndian.PutUint64(buf, magic)
 			log.Printf("magic: %X %X %X %X\n", buf[0], buf[1], buf[2], buf[3])
 			log.Printf("%X\n", m)
 
