@@ -8,12 +8,23 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/shogo82148/go-clockboundc"
+	mmap "github.com/edsrzf/mmap-go"
 )
 
 func main() {
-	c, err := clockboundc.NewWithPath(clockboundc.DefaultSocketPath)
+	f, err := os.OpenFile("/var/run/clockbound/shm", os.O_RDONLY, 0755)
 	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer f.Close()
+
+	m, err := mmap.Map(f, mmap.RDWR, 0)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := m.Unmap(); err != nil {
 		log.Fatal(err)
 	}
 
@@ -30,22 +41,24 @@ func main() {
 			case <-ticker.C:
 			}
 
-			now, err := c.Now()
-			if err != nil {
-				log.Println(err)
-				continue
-			}
+			log.Printf("%X\n", m)
 
-			if now.Header.Unsynchronized {
-				log.Println("Unsynchronized")
-			} else {
-				log.Println("Synchronized")
-			}
+			// now, err := c.Now()
+			// if err != nil {
+			// 	log.Println(err)
+			// 	continue
+			// }
 
-			log.Println("Current: ", now.Time)
-			log.Println("Earliest:", now.Bound.Earliest)
-			log.Println("Latest:  ", now.Bound.Latest)
-			log.Println("Range:   ", now.Bound.Latest.Sub(now.Bound.Earliest))
+			// if now.Header.Unsynchronized {
+			// 	log.Println("Unsynchronized")
+			// } else {
+			// 	log.Println("Synchronized")
+			// }
+
+			// log.Println("Current: ", now.Time)
+			// log.Println("Earliest:", now.Bound.Earliest)
+			// log.Println("Latest:  ", now.Bound.Latest)
+			// log.Println("Range:   ", now.Bound.Latest.Sub(now.Bound.Earliest))
 		}
 	}()
 
@@ -60,5 +73,4 @@ func main() {
 	<-done
 
 	ticker.Stop()
-	c.Close()
 }
