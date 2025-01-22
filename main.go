@@ -40,6 +40,7 @@ func main() {
 			case <-ticker.C:
 			}
 
+			log.Printf("len: %d\n", len(m))
 			magic := binary.LittleEndian.Uint64(m[:8])
 			buf := make([]byte, 8)
 			binary.LittleEndian.PutUint64(buf, magic)
