@@ -85,9 +85,10 @@ func main() {
 			latest := ts.Add(time.Nanosecond * time.Duration(bound))
 
 			unix_ns := latest.UnixNano() - (latest.UnixNano()-earliest.UnixNano())/2
-			log.Printf("now: %v\n", fromUnixNano(uint64(unix_ns)))
 			log.Printf("up : %v\n", latest)
+			log.Printf("now: %v\n", fromUnixNano(uint64(unix_ns)))
 			log.Printf("low: %v\n", earliest)
+			log.Printf("range: %v\n", latest.Sub(earliest))
 
 			// now, err := c.Now()
 			// if err != nil {
