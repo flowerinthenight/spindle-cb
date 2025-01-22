@@ -66,8 +66,8 @@ func main() {
 			log.Printf("void-after-ts (ns): 0x%X %d\n", va_ns, va_ns)
 			vts := time.Unix(int64(va_s), int64(va_ns))
 
-			log.Printf("ts1: %v\n", ts.Format(time.RFC3339Nano))
-			log.Printf("ts2: %v\n", vts.Format(time.RFC3339Nano))
+			log.Printf("as_of_ts  : %v\n", ts.Format(time.RFC3339Nano))
+			log.Printf("void_after: %v\n", vts.Format(time.RFC3339Nano))
 
 			bound := binary.LittleEndian.Uint64(m[48:56])
 			log.Printf("bound_ns: 0x%X %d\n", bound, bound)
@@ -80,6 +80,11 @@ func main() {
 
 			status := binary.LittleEndian.Uint32(m[64:68])
 			log.Printf("clock_status: 0x%X %d\n", status, status)
+
+			earliest := ts.Add(-1 * (time.Nanosecond * time.Duration(bound)))
+			latest := ts.Add(time.Nanosecond * time.Duration(bound))
+
+			log.Printf("now: %v\n", latest.UnixNano()-(latest.UnixNano()-earliest.UnixNano())/2)
 
 			// now, err := c.Now()
 			// if err != nil {
