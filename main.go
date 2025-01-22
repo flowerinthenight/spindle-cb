@@ -56,14 +56,15 @@ func main() {
 			log.Printf("as-of-ts (s): 0x%X %d\n", asof_s, asof_s)
 			asof_ns := binary.LittleEndian.Uint64(m[24:32])
 			log.Printf("as-of-ts (ns): 0x%X %d\n", asof_ns, asof_ns)
+			ts := time.Unix(int64(asof_s), int64(asof_ns))
+			log.Printf("ts: %v %v\n", ts.Format(time.RFC3339), ts.Format(time.RFC3339Nano))
 
 			va_s := binary.LittleEndian.Uint64(m[32:40])
 			log.Printf("void-after-ts (s): 0x%X %d\n", va_s, va_s)
 			va_ns := binary.LittleEndian.Uint64(m[40:48])
 			log.Printf("void-after-ts (ns): 0x%X %d\n", va_ns, va_ns)
-
-			ts := time.Unix(int64(asof_s), int64(asof_ns))
-			log.Printf("ts: %v %v\n", ts.Format(time.RFC3339), ts.Format(time.RFC3339Nano))
+			vts := time.Unix(int64(va_s), int64(va_ns))
+			log.Printf("void-after-ts: %v %v\n", vts.Format(time.RFC3339), vts.Format(time.RFC3339Nano))
 
 			// now, err := c.Now()
 			// if err != nil {
