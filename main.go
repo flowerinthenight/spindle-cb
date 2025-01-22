@@ -52,20 +52,22 @@ func main() {
 			gen := binary.LittleEndian.Uint16(m[14:16])
 			log.Printf("generation: 0x%X %d\n", gen, gen)
 
+			// As-of-timestamp
 			asof_s := binary.LittleEndian.Uint64(m[16:24])
 			log.Printf("as-of-ts (s): 0x%X %d\n", asof_s, asof_s)
 			asof_ns := binary.LittleEndian.Uint64(m[24:32])
 			log.Printf("as-of-ts (ns): 0x%X %d\n", asof_ns, asof_ns)
 			ts := time.Unix(int64(asof_s), int64(asof_ns))
 
+			// Void-after-timestamp
 			va_s := binary.LittleEndian.Uint64(m[32:40])
 			log.Printf("void-after-ts (s): 0x%X %d\n", va_s, va_s)
 			va_ns := binary.LittleEndian.Uint64(m[40:48])
 			log.Printf("void-after-ts (ns): 0x%X %d\n", va_ns, va_ns)
 			vts := time.Unix(int64(va_s), int64(va_ns))
 
-			log.Printf("ts1: %v %v\n", ts.Format(time.RFC3339), ts.Format(time.RFC3339Nano))
-			log.Printf("ts2: %v %v\n", vts.Format(time.RFC3339), vts.Format(time.RFC3339Nano))
+			log.Printf("ts1: %v\n", ts.Format(time.RFC3339Nano))
+			log.Printf("ts2: %v\n", vts.Format(time.RFC3339Nano))
 
 			bound := binary.LittleEndian.Uint64(m[48:56])
 			log.Printf("bound_ns: 0x%X %d\n", bound, bound)
