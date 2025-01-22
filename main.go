@@ -40,6 +40,10 @@ func main() {
 			case <-ticker.C:
 			}
 
+			defer func(s time.Time) {
+				log.Println("clockbound took", time.Since(s))
+			}(time.Now())
+
 			log.Printf("len: %d\n", len(m))
 			log.Printf("%X\n", m)
 
