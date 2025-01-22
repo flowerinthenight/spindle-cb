@@ -41,7 +41,9 @@ func main() {
 			}
 
 			magic := binary.BigEndian.Uint64(m[:8])
-			log.Printf("magic: %X\n", magic)
+			buf := make([]byte, 8)
+			binary.BigEndian.PutUint64(buf, magic)
+			log.Printf("magic: %X %X %X %X\n", buf[0], buf[1], buf[2], buf[3])
 			log.Printf("%X\n", m)
 
 			// now, err := c.Now()
