@@ -14,18 +14,16 @@ import (
 func main() {
 	f, err := os.OpenFile("/var/run/clockbound/shm", os.O_RDONLY, 0755)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("OpenFile failed:", err)
+		return
 	}
 
 	defer f.Close()
 
 	m, err := mmap.Map(f, mmap.RDWR, 0)
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := m.Unmap(); err != nil {
-		log.Fatal(err)
+		log.Println("Map failed:", err)
+		return
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -73,4 +71,9 @@ func main() {
 	<-done
 
 	ticker.Stop()
+
+	if err := m.Unmap(); err != nil {
+		log.Println("Unmap failed:", err)
+		return
+	}
 }
