@@ -41,13 +41,14 @@ func main() {
 			}
 
 			log.Printf("len: %d\n", len(m))
-			magic := binary.LittleEndian.Uint64(m[:8])
-			mmagic := make([]byte, 8)
-			binary.LittleEndian.PutUint64(mmagic, magic)
-			log.Printf("magic: %X %X %X %X\n", mmagic[0], mmagic[1], mmagic[2], mmagic[3])
+			size := binary.LittleEndian.Uint32(m[8:12])
+			log.Printf("size: 0x%X %d\n", size, size)
 
-			size := binary.BigEndian.Uint32(m[8:12])
-			log.Printf("size: %X %d\n", size, size)
+			ver := binary.LittleEndian.Uint32(m[12:14])
+			log.Printf("version: 0x%X %d\n", ver, ver)
+
+			gen := binary.LittleEndian.Uint32(m[14:16])
+			log.Printf("generation: 0x%X %d\n", gen, gen)
 
 			log.Printf("%X\n", m)
 
