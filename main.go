@@ -50,6 +50,11 @@ func main() {
 			gen := binary.LittleEndian.Uint16(m[14:16])
 			log.Printf("generation: 0x%X %d\n", gen, gen)
 
+			asof_s := binary.LittleEndian.Uint64(m[16:24])
+			log.Printf("as-of-ts (s): 0x%X %d\n", asof_s, asof_s)
+			asof_ns := binary.LittleEndian.Uint64(m[24:32])
+			log.Printf("as-of-ts (ns): 0x%X %d\n", asof_ns, asof_ns)
+
 			log.Printf("%X\n", m)
 
 			// now, err := c.Now()
