@@ -39,6 +39,7 @@ func main() {
 			case <-ticker.C:
 			}
 
+			log.Printf("magic: %X\n", m[:8])
 			log.Printf("%X\n", m)
 
 			// now, err := c.Now()
