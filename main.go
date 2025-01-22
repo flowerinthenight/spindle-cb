@@ -44,10 +44,10 @@ func main() {
 			size := binary.LittleEndian.Uint32(m[8:12])
 			log.Printf("size: 0x%X %d\n", size, size)
 
-			ver := binary.LittleEndian.Uint32(m[12:14])
+			ver := binary.LittleEndian.Uint16(m[12:14])
 			log.Printf("version: 0x%X %d\n", ver, ver)
 
-			gen := binary.LittleEndian.Uint32(m[14:16])
+			gen := binary.LittleEndian.Uint16(m[14:16])
 			log.Printf("generation: 0x%X %d\n", gen, gen)
 
 			log.Printf("%X\n", m)
