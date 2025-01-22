@@ -67,6 +67,18 @@ func main() {
 			log.Printf("ts1: %v %v\n", ts.Format(time.RFC3339), ts.Format(time.RFC3339Nano))
 			log.Printf("ts2: %v %v\n", vts.Format(time.RFC3339), vts.Format(time.RFC3339Nano))
 
+			bound := binary.LittleEndian.Uint64(m[48:56])
+			log.Printf("bound_ns: 0x%X %d\n", bound, bound)
+
+			drift := binary.LittleEndian.Uint32(m[56:60])
+			log.Printf("drift: 0x%X %d\n", drift, drift)
+
+			reserved := binary.LittleEndian.Uint32(m[60:64])
+			log.Printf("reserved: 0x%X %d\n", reserved, reserved)
+
+			status := binary.LittleEndian.Uint32(m[64:68])
+			log.Printf("clock_status: 0x%X %d\n", status, status)
+
 			// now, err := c.Now()
 			// if err != nil {
 			// 	log.Println(err)
