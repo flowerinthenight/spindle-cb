@@ -35,5 +35,5 @@ jobs:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
         go build -v
-        tar czvf spindle-${GITHUB_REF_NAME}-x86_64-linux.tar.gz spindle
+        tar czvf spindle-${GITHUB_REF_NAME}-x86_64-linux.tar.gz spindle-cb
         gh release create ${GITHUB_REF_NAME} ./*.tar.gz --generate-notes
