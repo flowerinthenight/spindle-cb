@@ -46,7 +46,7 @@ func main() {
 			binary.LittleEndian.PutUint64(mmagic, magic)
 			log.Printf("magic: %X %X %X %X\n", mmagic[0], mmagic[1], mmagic[2], mmagic[3])
 
-			size := binary.LittleEndian.Uint32(m[8:12])
+			size := binary.BigEndian.Uint32(m[8:12])
 			log.Printf("size: %X %d\n", size, size)
 
 			log.Printf("%X\n", m)
