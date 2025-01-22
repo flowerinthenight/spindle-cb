@@ -55,6 +55,9 @@ func main() {
 			asof_ns := binary.LittleEndian.Uint64(m[24:32])
 			log.Printf("as-of-ts (ns): 0x%X %d\n", asof_ns, asof_ns)
 
+			ts := time.Unix(int64(asof_s), int64(asof_ns))
+			log.Printf("ts: %v %v\n", ts.Format(time.RFC3339), ts.Format(time.RFC3339Nano))
+
 			log.Printf("%X\n", m)
 
 			// now, err := c.Now()
@@ -92,4 +95,8 @@ func main() {
 		log.Println("Unmap failed:", err)
 		return
 	}
+}
+
+func fromUnixNano(nano uint64) time.Time {
+	return time.Unix(int64(nano/1e9), int64(nano%1e9))
 }
