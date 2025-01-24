@@ -9,8 +9,10 @@ $ aws ec2 create-launch-template \
   --launch-template-data '
   {
     "UserData":"'"$(cat startup-aws-asg.sh | base64 -w 0)"'",
-    "ImageId":"ami-0f75d1a8c9141bd00",
-    "InstanceType":"t2.micro"
+    "ImageId":"ami-0fb04413c9de69305",
+    "InstanceType":"t2.micro",
+    "KeyName":"fkp",
+    "SecurityGroupIds":["sg-0090ee1bc26c57efe"]
   }'
 
 # Create the ASG:
@@ -19,6 +21,7 @@ $ aws autoscaling create-auto-scaling-group \
   --launch-template LaunchTemplateName=spindle-lt,Version='1' \
   --min-size 1 \
   --max-size 1 \
+  --tags Key=Name,Value=spindle-asg \
   --availability-zones {target-zone}
 
 # You can view the logs through:
