@@ -27,9 +27,9 @@ int hello() {
 
   printf("When clockbound_now was called true time was somewhere within "
          "%ld.%09ld and %ld.%09ld seconds since Jan 1 1970. The clock status "
-         "is %s.\n",
+         "is %d.\n",
          first.earliest.tv_sec, first.earliest.tv_nsec, first.latest.tv_sec,
-         first.latest.tv_nsec, format_clock_status(first.clock_status));
+         first.latest.tv_nsec, first.clock_status);
 
   if (ctx != NULL) {
     err = clockbound_close(ctx);
@@ -40,22 +40,6 @@ int hello() {
   }
 
   return 0;
-}
-
-/*
- * Helper function to convert clock status codes into a human readable version.
- */
-char *format_clock_status(clockbound_clock_status status) {
-  switch (status) {
-  case CLOCKBOUND_STA_UNKNOWN:
-    return "UNKNOWN";
-  case CLOCKBOUND_STA_SYNCHRONIZED:
-    return "SYNCHRONIZED";
-  case CLOCKBOUND_STA_FREE_RUNNING:
-    return "FREE_RUNNING";
-  default:
-    return "BAD CLOCK STATUS";
-  }
 }
 
 /*
