@@ -4,6 +4,7 @@
 char const *shm_path = CLOCKBOUND_SHM_DEFAULT_PATH;
 clockbound_ctx* ctx = NULL;
 
+/* Open ClockBound's shared memory segment. */
 int cb_open() {
   clockbound_err open_err;
   if (ctx == NULL) {
@@ -14,6 +15,7 @@ int cb_open() {
   return 0;
 }
 
+/* Close ClockBound's shared memory segment. */
 int cb_close() {
   if (ctx != NULL) {
     clockbound_err const *err;
@@ -28,6 +30,7 @@ int cb_close() {
   return 0;
 }
 
+/* Read a bounded timestamp from ClockBound. */
 int cb_now(int *e_s, int *e_ns, int *l_s, int *l_ns, int *s) {
   if (ctx == NULL) return 1;
 
