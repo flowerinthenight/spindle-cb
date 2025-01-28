@@ -37,7 +37,7 @@ int cb_close() {
   return 0;
 }
 
-int cb_now(int *e_s, int *e_ns, long int *l_s, long int *l_ns, int *s) {
+int cb_now(int *e_s, int *e_ns, int *l_s, int *l_ns, int *s) {
   if (ctx == NULL) {
     printf("not init");
     return 1;
