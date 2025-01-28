@@ -11,6 +11,7 @@ import (
 	clockboundclient "github.com/flowerinthenight/clockbound-client-go"
 )
 
+// #cgo CFLAGS: -g -Wall
 // #cgo LDFLAGS: -lclockbound
 // #include "hello.h"
 import "C"
