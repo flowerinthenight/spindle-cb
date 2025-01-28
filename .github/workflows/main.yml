@@ -37,7 +37,12 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
-        ls /tmp/clock-bound/
-        #GOOS=linux GOARCH=amd64 go build -v
-        #tar czvf spindle-${GITHUB_REF_NAME}-x86_64-linux.tar.gz spindle-cb
-        #gh release create ${GITHUB_REF_NAME} ./*.tar.gz --generate-notes
+        cd /tmp/clock-bound/clock-bound-ffi/
+        cargo build --release
+        cd /tmp/clock-bound/
+        cp -v clock-bound-ffi/include/clockbound.h /usr/include/
+        cp -v target/release/libclockbound.a /usr/lib/
+        cp -v target/release/libclockbound.so /usr/lib/
+        GOOS=linux GOARCH=amd64 go build -v
+        tar czvf spindle-${GITHUB_REF_NAME}-x86_64-linux.tar.gz spindle-cb
+        gh release create ${GITHUB_REF_NAME} ./*.tar.gz --generate-notes
