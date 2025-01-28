@@ -6,7 +6,6 @@ clockbound_ctx* ctx = NULL;
 
 int open() {
   clockbound_err open_err;
-  clockbound_err const *err;
 
   if (ctx == NULL) {
     ctx = clockbound_open(shm_path, &open_err);
@@ -22,6 +21,8 @@ int open() {
 }
 
 int close() {
+  clockbound_err const *err;
+
   if (ctx != NULL) {
     err = clockbound_close(ctx);
     if (err) {
