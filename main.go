@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/flowerinthenight/clockbound-ffi-go"
+	clockbound "github.com/flowerinthenight/clockbound-ffi-go"
 )
 
 func main() {
