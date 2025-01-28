@@ -71,26 +71,26 @@ int cb_now(int *e_s, int *e_ns, int *l_s, int *l_ns, int *s) {
  * Helper function to print out errors returned by libclockbound.
  */
 void print_clockbound_err(char const* detail, const clockbound_err *err) {
-        fprintf(stderr, "%s: ", detail);
-        switch (err->kind) {
-                case CLOCKBOUND_ERR_NONE:
-                        fprintf(stderr, "Success\n");
-                        break;
-                case CLOCKBOUND_ERR_SYSCALL:
-                        if (err->detail) {
-                                fprintf(stderr, "%s: %s\n", err->detail, strerror(err->sys_errno));
-                        } else {
-                                fprintf(stderr, "%s\n", strerror(err->sys_errno));
-                        }
-                        break;
-                case CLOCKBOUND_ERR_SEGMENT_NOT_INITIALIZED:
-                        fprintf(stderr, "Segment not initialized\n");
-                        break;
-                case CLOCKBOUND_ERR_SEGMENT_MALFORMED:
-                        fprintf(stderr, "Segment malformed\n");
-                        break;
-                case CLOCKBOUND_ERR_CAUSALITY_BREACH:
-                        fprintf(stderr, "Segment and clock reads out of order\n");
-                        break;
-        }
+  fprintf(stderr, "%s: ", detail);
+  switch (err->kind) {
+    case CLOCKBOUND_ERR_NONE:
+      fprintf(stderr, "Success\n");
+      break;
+    case CLOCKBOUND_ERR_SYSCALL:
+      if (err->detail) {
+        fprintf(stderr, "%s: %s\n", err->detail, strerror(err->sys_errno));
+      } else {
+        fprintf(stderr, "%s\n", strerror(err->sys_errno));
+      }
+      break;
+    case CLOCKBOUND_ERR_SEGMENT_NOT_INITIALIZED:
+      fprintf(stderr, "Segment not initialized\n");
+      break;
+    case CLOCKBOUND_ERR_SEGMENT_MALFORMED:
+      fprintf(stderr, "Segment malformed\n");
+      break;
+    case CLOCKBOUND_ERR_CAUSALITY_BREACH:
+      fprintf(stderr, "Segment and clock reads out of order\n");
+      break;
+  }
 }
