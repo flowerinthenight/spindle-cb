@@ -16,7 +16,7 @@ import (
 import "C"
 
 func main() {
-	C.hello()
+	_ = C.hello()
 
 	client, err := clockboundclient.New()
 	if err != nil {
