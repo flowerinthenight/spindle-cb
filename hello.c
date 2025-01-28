@@ -4,10 +4,9 @@
 char const *shm_path = CLOCKBOUND_SHM_DEFAULT_PATH;
 clockbound_ctx* ctx = NULL;
 
-int hello() {
+int open() {
   clockbound_err open_err;
   clockbound_err const *err;
-  clockbound_now_result first;
 
   if (ctx == NULL) {
     ctx = clockbound_open(shm_path, &open_err);
@@ -19,8 +18,31 @@ int hello() {
     }
   }
 
-  printf("hello!\n");
+  return 0;
+}
 
+int close() {
+  if (ctx != NULL) {
+    err = clockbound_close(ctx);
+    if (err) {
+      print_clockbound_err("clockbound_close", err);
+      return 1;
+    } else {
+      printf("ctx destroyed");
+      ctx = NULL;
+    }
+  }
+
+  return 0;
+}
+
+int now() {
+  if (ctx == NULL) {
+    printf("not init");
+    return 1;
+  }
+
+  clockbound_now_result first;
   err = clockbound_now(ctx, &first);
   if (err) {
     print_clockbound_err("clockbound_now", err);
@@ -32,16 +54,6 @@ int hello() {
          "is %d.\n",
          first.earliest.tv_sec, first.earliest.tv_nsec, first.latest.tv_sec,
          first.latest.tv_nsec, first.clock_status);
-
-  if (ctx != NULL) {
-    err = clockbound_close(ctx);
-    if (err) {
-      print_clockbound_err("clockbound_close", err);
-      return 1;
-    } else {
-      printf("ctx destroyed");
-    }
-  }
 
   return 0;
 }

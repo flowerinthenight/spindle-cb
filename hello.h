@@ -1,1 +1,3 @@
-int hello();
+int open();
+int close();
+int now();
