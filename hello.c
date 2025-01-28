@@ -37,7 +37,7 @@ int cb_close() {
   return 0;
 }
 
-int cb_now() {
+int cb_now(int* s) {
   if (ctx == NULL) {
     printf("not init");
     return 1;
@@ -57,6 +57,8 @@ int cb_now() {
          "is %d.\n",
          now.earliest.tv_sec, now.earliest.tv_nsec, now.latest.tv_sec,
          now.latest.tv_nsec, now.clock_status);
+
+  *s = now.earliest.tv_sec;
 
   return 0;
 }
