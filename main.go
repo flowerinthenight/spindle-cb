@@ -30,9 +30,7 @@ func main() {
 			case <-ticker.C:
 			}
 
-			start := time.Now()
 			now, err := cb.Now()
-			elapsed := time.Since(start)
 			if err != nil {
 				log.Println("Now failed: %v", err)
 				continue
@@ -42,7 +40,6 @@ func main() {
 			log.Printf("latest  : %v\n", now.Latest.Format(time.RFC3339Nano))
 			log.Printf("range: %v\n", now.Latest.Sub(now.Earliest))
 			log.Printf("status: %v\n", now.Status)
-			log.Printf("elapsed: %v\n", elapsed)
 			log.Println("")
 		}
 	}()
