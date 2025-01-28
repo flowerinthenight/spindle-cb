@@ -20,6 +20,7 @@ func main() {
 	var s C.int
 	_ = C.cb_open()
 	_ = C.cb_now(&s)
+	log.Println("from C:", s)
 	_ = C.cb_close()
 
 	client, err := clockboundclient.New()
