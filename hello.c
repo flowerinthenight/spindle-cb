@@ -43,7 +43,9 @@ int now() {
     return 1;
   }
 
+  clockbound_err const *err;
   clockbound_now_result first;
+
   err = clockbound_now(ctx, &first);
   if (err) {
     print_clockbound_err("clockbound_now", err);
