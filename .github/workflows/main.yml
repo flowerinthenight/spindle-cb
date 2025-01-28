@@ -25,9 +25,11 @@ jobs:
 
     - name: Run tests
       run: |
+        ROOTDIR=$PWD
         cd /tmp/
         git clone https://github.com/aws/clock-bound
         sudo cp -v clock-bound/clock-bound-ffi/include/clockbound.h /usr/include/
+        cd $ROOTDIR/
         go test -v ./...
 
     - name: Build binary
