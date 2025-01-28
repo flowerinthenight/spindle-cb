@@ -1,7 +1,7 @@
 package clockbound
 
 import (
-	"log"
+	"fmt"
 	"sync/atomic"
 	"time"
 )
@@ -27,24 +27,34 @@ type NowT struct {
 
 type ClockBound struct {
 	active atomic.Int32
+	error  atomic.Int32
 	get    chan struct{}
 	data   chan cbtime
 	close  chan error
 	done   chan error
 }
 
-func (cb *ClockBound) Now() NowT {
+func (cb *ClockBound) Now() (NowT, error) {
+	code := cb.error.Load()
+	if code != 0 {
+		return NowT{}, fmt.Errorf("Now failed: %d", code)
+	}
+
 	cb.get <- struct{}{}
 	d := <-cb.data
 	return NowT{
 		Earliest: time.Unix(int64(d.earliest_s), int64(d.earliest_ns)),
 		Latest:   time.Unix(int64(d.latest_s), int64(d.latest_ns)),
 		Status:   d.status,
-	}
+	}, nil
 }
 
 func (cb *ClockBound) Close() {
 	if cb.active.Load() == 0 {
+		return
+	}
+
+	if cb.error.Load() != 0 {
 		return
 	}
 
@@ -60,14 +70,17 @@ func New() *ClockBound {
 	cb.done = make(chan error, 1)
 
 	go func() {
-		e_open := C.cb_open()
-		log.Println("e_open:", e_open)
+		cb.error.Store(int32(C.cb_open()))
+		if cb.error.Load() != 0 {
+			return
+		}
+
 		cb.active.Store(1)
 
 		for {
 			select {
 			case <-cb.close:
-				C.cb_close()
+				cb.error.Store(int32(C.cb_close()))
 				cb.active.Store(0)
 				cb.done <- nil
 				return
