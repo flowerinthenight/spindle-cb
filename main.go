@@ -17,11 +17,11 @@ import (
 import "C"
 
 func main() {
-	_ = C.open()
+	_ = C.cb_open()
 	// _ = C.now()
 	// time.Sleep(time.Millisecond * 500)
 	// _ = C.now()
-	// _ = C.close()
+	_ = C.cb_close()
 
 	client, err := clockboundclient.New()
 	if err != nil {

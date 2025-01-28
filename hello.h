@@ -1,3 +1,3 @@
-int open();
-int close();
-int now();
+int cb_open();
+int cb_close();
+int cb_now();

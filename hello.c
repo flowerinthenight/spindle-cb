@@ -4,7 +4,7 @@
 char const *shm_path = CLOCKBOUND_SHM_DEFAULT_PATH;
 clockbound_ctx* ctx = NULL;
 
-int open() {
+int cb_open() {
   clockbound_err open_err;
 
   if (ctx == NULL) {
@@ -20,7 +20,7 @@ int open() {
   return 0;
 }
 
-int close() {
+int cb_close() {
   clockbound_err const *err;
 
   if (ctx != NULL) {
@@ -37,7 +37,7 @@ int close() {
   return 0;
 }
 
-int now() {
+int cb_now() {
   if (ctx == NULL) {
     printf("not init");
     return 1;
