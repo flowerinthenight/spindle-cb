@@ -90,13 +90,17 @@ func New() *ClockBound {
 			var earliest_s, latest_s, status C.int
 			var earliest_ns, latest_ns C.int
 
-			_ = C.cb_now(
+			cb.error.Store(int32(C.cb_now(
 				&earliest_s,
 				&earliest_ns,
 				&latest_s,
 				&latest_ns,
 				&status,
-			)
+			)))
+
+			if cb.error.Load() != 0 {
+				continue
+			}
 
 			cb.data <- cbtime{
 				earliest_s:  int(earliest_s),
