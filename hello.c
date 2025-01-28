@@ -44,9 +44,9 @@ int cb_now() {
   }
 
   clockbound_err const *err;
-  clockbound_now_result first;
+  clockbound_now_result now;
 
-  err = clockbound_now(ctx, &first);
+  err = clockbound_now(ctx, &now);
   if (err) {
     print_clockbound_err("clockbound_now", err);
     return 1;
@@ -55,8 +55,8 @@ int cb_now() {
   printf("When clockbound_now was called true time was somewhere within "
          "%ld.%09ld and %ld.%09ld seconds since Jan 1 1970. The clock status "
          "is %d.\n",
-         first.earliest.tv_sec, first.earliest.tv_nsec, first.latest.tv_sec,
-         first.latest.tv_nsec, first.clock_status);
+         now.earliest.tv_sec, now.earliest.tv_nsec, now.latest.tv_sec,
+         now.latest.tv_nsec, now.clock_status);
 
   return 0;
 }
