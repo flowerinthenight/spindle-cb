@@ -1,6 +1,7 @@
 package clockbound
 
 import (
+	"log"
 	"sync/atomic"
 	"time"
 )
@@ -59,13 +60,14 @@ func New() *ClockBound {
 	cb.done = make(chan error, 1)
 
 	go func() {
-		_ = C.cb_open()
+		e_open := C.cb_open()
+		log.Println("e_open:", e_open)
 		cb.active.Store(1)
 
 		for {
 			select {
 			case <-cb.close:
-				_ = C.cb_close()
+				C.cb_close()
 				cb.active.Store(0)
 				cb.done <- nil
 				return
