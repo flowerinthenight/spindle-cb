@@ -13,7 +13,7 @@ int cb_open() {
       print_clockbound_err("clockbound_open", &open_err);
       return 1;
     } else {
-      printf("ctx created");
+      printf("ctx created\n");
     }
   }
 
@@ -29,7 +29,7 @@ int cb_close() {
       print_clockbound_err("clockbound_close", err);
       return 1;
     } else {
-      printf("ctx destroyed");
+      printf("ctx destroyed\n");
       ctx = NULL;
     }
   }
