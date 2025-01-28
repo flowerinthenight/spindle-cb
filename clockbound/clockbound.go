@@ -22,6 +22,7 @@ type ClockBound struct {
 	get    chan struct{}
 	data   chan int
 	close  chan error
+	done   chan error
 }
 
 func (cb *ClockBound) Now() (NowT, error) {
@@ -37,6 +38,7 @@ func (cb *ClockBound) Close() {
 	}
 
 	cb.close <- nil
+	<-cb.done
 }
 
 func New() *ClockBound {
@@ -44,6 +46,7 @@ func New() *ClockBound {
 	cb.get = make(chan struct{}, 1)
 	cb.data = make(chan int, 1)
 	cb.close = make(chan error, 1)
+	cb.done = make(chan error, 1)
 
 	go func() {
 		_ = C.cb_open()
@@ -55,6 +58,7 @@ func New() *ClockBound {
 			case <-cb.close:
 				_ = C.cb_close()
 				cb.active.Store(0)
+				cb.done <- nil
 				return
 			case <-cb.get:
 			}
