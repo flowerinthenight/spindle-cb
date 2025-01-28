@@ -21,7 +21,7 @@ func main() {
 	// _ = C.now()
 	// time.Sleep(time.Millisecond * 500)
 	// _ = C.now()
-	_ = C.close()
+	// _ = C.close()
 
 	client, err := clockboundclient.New()
 	if err != nil {
