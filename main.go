@@ -18,7 +18,7 @@ import "C"
 
 func main() {
 	var earliest_s, latest_s, status C.int
-	var earliest_ns, latest_ns C.long
+	var earliest_ns, latest_ns C.int
 	_ = C.cb_open()
 
 	_ = C.cb_now(
