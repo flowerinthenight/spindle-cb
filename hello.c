@@ -37,7 +37,7 @@ int cb_close() {
   return 0;
 }
 
-int cb_now(int* s) {
+int cb_now(int *e_s, int *e_ns, long int *l_s, long int *l_ns, int *s) {
   if (ctx == NULL) {
     printf("not init");
     return 1;
@@ -58,7 +58,11 @@ int cb_now(int* s) {
          now.earliest.tv_sec, now.earliest.tv_nsec, now.latest.tv_sec,
          now.latest.tv_nsec, now.clock_status);
 
-  *s = now.earliest.tv_sec;
+  *e_s = now.earliest.tv_sec;
+  *e_ns = now.earliest.tv_nsec;
+  *l_s = now.latest.tv_sec;
+  *l_ns = now.latest.tv_nsec;
+  *s = now.clock_status;
 
   return 0;
 }

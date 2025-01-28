@@ -17,10 +17,20 @@ import (
 import "C"
 
 func main() {
-	var s C.int
+	var earliest_s, latest_s, status C.int
+	var earliest_ns, latest_ns C.long
 	_ = C.cb_open()
-	_ = C.cb_now(&s)
-	log.Println("from C:", s)
+
+	_ = C.cb_now(
+		&earliest_s,
+		&earliest_ns,
+		&latest_s,
+		&latest_ns,
+		&status,
+	)
+
+	log.Println("from C:", earliest_s, earliest_ns, latest_s, latest_ns, status)
+
 	_ = C.cb_close()
 
 	client, err := clockboundclient.New()
