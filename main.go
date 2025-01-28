@@ -11,7 +11,12 @@ import (
 	clockboundclient "github.com/flowerinthenight/clockbound-client-go"
 )
 
+// #include "hello.h"
+import "C"
+
 func main() {
+	C.hello()
+
 	client, err := clockboundclient.New()
 	if err != nil {
 		log.Println("New failed:", err)
