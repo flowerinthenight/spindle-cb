@@ -32,7 +32,7 @@ func main() {
 
 			now, err := cb.Now()
 			if err != nil {
-				log.Println("Now failed: %v", err)
+				log.Println("Now failed:", err)
 				continue
 			}
 
