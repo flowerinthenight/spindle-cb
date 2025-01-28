@@ -9,7 +9,24 @@ import (
 // #cgo CFLAGS: -g -Wall
 // #cgo LDFLAGS: -lclockbound
 // #include "cb_ffi.h"
+// #include <clockbound.h>
 import "C"
+
+type ClockStatus int
+
+const (
+	ClockStatusUnknown ClockStatus = iota
+	ClockStatusSynchronized
+	ClockStatusFreeRunning
+)
+
+var ClockStatusName = map[ClockStatus]string{
+	ClockStatusUnknown:      "UNKNOWN",
+	ClockStatusSynchronized: "SYNCHRONIZED",
+	ClockStatusFreeRunning:  "FREE_RUNNING",
+}
+
+func (cs ClockStatus) String() string { return ClockStatusName[cs] }
 
 type cbtime struct {
 	earliest_s  int
@@ -22,7 +39,7 @@ type cbtime struct {
 type NowT struct {
 	Earliest time.Time
 	Latest   time.Time
-	Status   int
+	Status   ClockStatus
 }
 
 type ClockBound struct {
@@ -45,7 +62,7 @@ func (cb *ClockBound) Now() (NowT, error) {
 	return NowT{
 		Earliest: time.Unix(int64(d.earliest_s), int64(d.earliest_ns)),
 		Latest:   time.Unix(int64(d.latest_s), int64(d.latest_ns)),
-		Status:   d.status,
+		Status:   ClockStatus(d.status),
 	}, nil
 }
 
