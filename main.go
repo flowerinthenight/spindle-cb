@@ -11,28 +11,7 @@ import (
 	"github.com/flowerinthenight/spindle-cb/clockbound"
 )
 
-// // #cgo CFLAGS: -g -Wall
-// // #cgo LDFLAGS: -lclockbound
-// // #include "hello.h"
-// import "C"
-
 func main() {
-	// var earliest_s, latest_s, status C.int
-	// var earliest_ns, latest_ns C.int
-	// _ = C.cb_open()
-
-	// _ = C.cb_now(
-	// 	&earliest_s,
-	// 	&earliest_ns,
-	// 	&latest_s,
-	// 	&latest_ns,
-	// 	&status,
-	// )
-
-	// log.Println("from C:", earliest_s, earliest_ns, latest_s, latest_ns, status)
-
-	// _ = C.cb_close()
-
 	cb := clockbound.New()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -52,11 +31,15 @@ func main() {
 			}
 
 			now, err := cb.Now()
+			if err != nil {
+				log.Println("Now failed: %v", err)
+				continue
+			}
+
 			log.Printf("earliest: %v\n", now.Earliest.Format(time.RFC3339Nano))
 			log.Printf("latest  : %v\n", now.Latest.Format(time.RFC3339Nano))
 			log.Printf("range: %v\n", now.Latest.Sub(now.Earliest))
 			log.Printf("status: %v\n", now.Status)
-			log.Printf("err: %v\n", err)
 			log.Println("")
 		}
 	}()

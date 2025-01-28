@@ -28,6 +28,26 @@ var ClockStatusName = map[ClockStatus]string{
 
 func (cs ClockStatus) String() string { return ClockStatusName[cs] }
 
+type ClockBoundErrorKind int
+
+const (
+	ClockBoundErrorKindNone ClockBoundErrorKind = iota
+	ClockBoundErrorKindSyscall
+	ClockBoundErrorKindSegmentNotInitialized
+	ClockBoundErrorKindSegmentMalformed
+	ClockBoundErrorKindCausalityBreach
+)
+
+var ClockBoundErrorKindName = map[ClockBoundErrorKind]string{
+	ClockBoundErrorKindNone:                  "NONE",
+	ClockBoundErrorKindSyscall:               "ERR_SYSCALL",
+	ClockBoundErrorKindSegmentNotInitialized: "ERR_SEGMENT_NOT_INITIALIZED",
+	ClockBoundErrorKindSegmentMalformed:      "ERR_SEGMENT_MALFORMED",
+	ClockBoundErrorKindCausalityBreach:       "ERR_CAUSALITY_BREACH",
+}
+
+func (e ClockBoundErrorKind) String() string { return ClockBoundErrorKindName[e] }
+
 type cbtime struct {
 	earliest_s  int
 	earliest_ns int
@@ -54,7 +74,13 @@ type ClockBound struct {
 func (cb *ClockBound) Now() (NowT, error) {
 	code := cb.error.Load()
 	if code != 0 {
-		return NowT{}, fmt.Errorf("Now failed: %d", code)
+		err := fmt.Errorf("Now failed: %d", code)
+		i := ClockBoundErrorKind(code)
+		if _, ok := ClockBoundErrorKindName[i]; ok {
+			err = fmt.Errorf(ClockBoundErrorKindName[i])
+		}
+
+		return NowT{}, err
 	}
 
 	cb.get <- struct{}{}
