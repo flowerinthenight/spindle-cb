@@ -14,6 +14,8 @@ int hello() {
     if (ctx == NULL) {
       print_clockbound_err("clockbound_open", &open_err);
       return 1;
+    } else {
+      printf("ctx created");
     }
   }
 
@@ -36,6 +38,8 @@ int hello() {
     if (err) {
       print_clockbound_err("clockbound_close", err);
       return 1;
+    } else {
+      printf("ctx destroyed")
     }
   }
 

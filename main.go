@@ -18,6 +18,8 @@ import "C"
 
 func main() {
 	_ = C.hello()
+	time.Sleep(time.Millisecond * 500)
+	_ = C.hello()
 
 	client, err := clockboundclient.New()
 	if err != nil {
