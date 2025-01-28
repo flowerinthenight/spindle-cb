@@ -55,12 +55,15 @@ type cbtime struct {
 	status      int
 }
 
-type ClockBoundNow struct {
+// Now represents a range of bounded timestamp from ClockBound.
+// The "true" time is somewhere within the range.
+type Now struct {
 	Earliest time.Time
 	Latest   time.Time
 	Status   ClockStatus
 }
 
+// Client represents a connection to ClockBound's shared memory file via FFI.
 type Client struct {
 	active atomic.Int32
 	error  atomic.Int32
@@ -70,7 +73,8 @@ type Client struct {
 	done   chan error
 }
 
-func (c *Client) Now() (ClockBoundNow, error) {
+// Now gets a set range of bounded timestamps from ClockBound.
+func (c *Client) Now() (Now, error) {
 	code := c.error.Load()
 	if code != 0 {
 		err := fmt.Errorf("Now failed: %d", code)
@@ -79,18 +83,19 @@ func (c *Client) Now() (ClockBoundNow, error) {
 			err = fmt.Errorf("%v", ClockBoundErrorKindName[i])
 		}
 
-		return ClockBoundNow{}, err
+		return Now{}, err
 	}
 
 	c.get <- struct{}{}
 	d := <-c.data
-	return ClockBoundNow{
+	return Now{
 		Earliest: time.Unix(int64(d.earliest_s), int64(d.earliest_ns)),
 		Latest:   time.Unix(int64(d.latest_s), int64(d.latest_ns)),
 		Status:   ClockStatus(d.status),
 	}, nil
 }
 
+// Close releases client resources.
 func (c *Client) Close() {
 	if c.active.Load() == 0 {
 		return
@@ -104,6 +109,7 @@ func (c *Client) Close() {
 	<-c.done
 }
 
+// New creates an instance of Client.
 func New() *Client {
 	c := &Client{}
 	c.get = make(chan struct{}, 1)
