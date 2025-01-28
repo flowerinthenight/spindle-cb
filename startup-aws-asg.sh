@@ -8,7 +8,7 @@ echo '# Ref: https://github.com/aws/clock-bound/tree/main/clock-bound-d' >> /etc
 echo 'maxclockerror 50' >> /etc/chrony.d/clockbound.conf
 systemctl restart chronyd
 systemctl status chronyd
-cp /clock-bound/target/release/clockbound /usr/local/bin/clockbound
+cp -v /clock-bound/target/release/clockbound /usr/local/bin/clockbound
 chown chrony:chrony /usr/local/bin/clockbound
 
 cat >/usr/lib/systemd/system/clockbound.service <<EOL
@@ -37,9 +37,9 @@ systemctl status clockbound
 
 cd /clock-bound/clock-bound-ffi/
 /root/.cargo/bin/cargo build --release
-cp /clock-bound/clock-bound-ffi/include/clockbound.h /usr/include/
-cp /clock-bound/target/release/libclockbound.a /usr/lib/
-cp /clock-bound/target/release/libclockbound.so /usr/lib/
+cp -v /clock-bound/clock-bound-ffi/include/clockbound.h /usr/include/
+cp -v /clock-bound/target/release/libclockbound.a /usr/lib/
+cp -v /clock-bound/target/release/libclockbound.so /usr/lib/
 
 wget https://github.com/flowerinthenight/spindle-cb/releases/download/v0.1.5/spindle-v0.1.5-x86_64-linux.tar.gz
 tar -xzvf spindle-v0.1.5-x86_64-linux.tar.gz
