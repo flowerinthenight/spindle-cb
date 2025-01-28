@@ -9,7 +9,6 @@ import (
 // #cgo CFLAGS: -g -Wall
 // #cgo LDFLAGS: -lclockbound
 // #include "cb_ffi.h"
-// #include <clockbound.h>
 import "C"
 
 type ClockStatus int
@@ -77,7 +76,7 @@ func (cb *ClockBound) Now() (NowT, error) {
 		err := fmt.Errorf("Now failed: %d", code)
 		i := ClockBoundErrorKind(code)
 		if _, ok := ClockBoundErrorKindName[i]; ok {
-			err = fmt.Errorf(ClockBoundErrorKindName[i])
+			err = fmt.Errorf("%v", ClockBoundErrorKindName[i])
 		}
 
 		return NowT{}, err
