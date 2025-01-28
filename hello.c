@@ -39,7 +39,7 @@ int hello() {
       print_clockbound_err("clockbound_close", err);
       return 1;
     } else {
-      printf("ctx destroyed")
+      printf("ctx destroyed");
     }
   }
 
