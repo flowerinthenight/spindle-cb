@@ -55,13 +55,13 @@ type cbtime struct {
 	status      int
 }
 
-type NowT struct {
+type ClockBoundNow struct {
 	Earliest time.Time
 	Latest   time.Time
 	Status   ClockStatus
 }
 
-type ClockBound struct {
+type Client struct {
 	active atomic.Int32
 	error  atomic.Int32
 	get    chan struct{}
@@ -70,8 +70,8 @@ type ClockBound struct {
 	done   chan error
 }
 
-func (cb *ClockBound) Now() (NowT, error) {
-	code := cb.error.Load()
+func (c *Client) Now() (ClockBoundNow, error) {
+	code := c.error.Load()
 	if code != 0 {
 		err := fmt.Errorf("Now failed: %d", code)
 		i := ClockBoundErrorKind(code)
@@ -79,60 +79,60 @@ func (cb *ClockBound) Now() (NowT, error) {
 			err = fmt.Errorf("%v", ClockBoundErrorKindName[i])
 		}
 
-		return NowT{}, err
+		return ClockBoundNow{}, err
 	}
 
-	cb.get <- struct{}{}
-	d := <-cb.data
-	return NowT{
+	c.get <- struct{}{}
+	d := <-c.data
+	return ClockBoundNow{
 		Earliest: time.Unix(int64(d.earliest_s), int64(d.earliest_ns)),
 		Latest:   time.Unix(int64(d.latest_s), int64(d.latest_ns)),
 		Status:   ClockStatus(d.status),
 	}, nil
 }
 
-func (cb *ClockBound) Close() {
-	if cb.active.Load() == 0 {
+func (c *Client) Close() {
+	if c.active.Load() == 0 {
 		return
 	}
 
-	if cb.error.Load() != 0 {
+	if c.error.Load() != 0 {
 		return
 	}
 
-	cb.close <- nil
-	<-cb.done
+	c.close <- nil
+	<-c.done
 }
 
-func New() *ClockBound {
-	cb := &ClockBound{}
-	cb.get = make(chan struct{}, 1)
-	cb.data = make(chan cbtime, 1)
-	cb.close = make(chan error, 1)
-	cb.done = make(chan error, 1)
+func New() *Client {
+	c := &Client{}
+	c.get = make(chan struct{}, 1)
+	c.data = make(chan cbtime, 1)
+	c.close = make(chan error, 1)
+	c.done = make(chan error, 1)
 
 	go func() {
-		cb.error.Store(int32(C.cb_open()))
-		if cb.error.Load() != 0 {
+		c.error.Store(int32(C.cb_open()))
+		if c.error.Load() != 0 {
 			return
 		}
 
-		cb.active.Store(1)
+		c.active.Store(1)
 
 		for {
 			select {
-			case <-cb.close:
-				cb.error.Store(int32(C.cb_close()))
-				cb.active.Store(0)
-				cb.done <- nil
+			case <-c.close:
+				c.error.Store(int32(C.cb_close()))
+				c.active.Store(0)
+				c.done <- nil
 				return
-			case <-cb.get:
+			case <-c.get:
 			}
 
 			var earliest_s, latest_s, status C.int
 			var earliest_ns, latest_ns C.int
 
-			cb.error.Store(int32(C.cb_now(
+			c.error.Store(int32(C.cb_now(
 				&earliest_s,
 				&earliest_ns,
 				&latest_s,
@@ -140,11 +140,11 @@ func New() *ClockBound {
 				&status,
 			)))
 
-			if cb.error.Load() != 0 {
+			if c.error.Load() != 0 {
 				continue
 			}
 
-			cb.data <- cbtime{
+			c.data <- cbtime{
 				earliest_s:  int(earliest_s),
 				earliest_ns: int(earliest_ns),
 				latest_s:    int(latest_s),
@@ -154,5 +154,5 @@ func New() *ClockBound {
 		}
 	}()
 
-	return cb
+	return c
 }
