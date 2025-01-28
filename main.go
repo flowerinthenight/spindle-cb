@@ -18,9 +18,9 @@ import "C"
 
 func main() {
 	_ = C.open()
-	_ = C.now()
-	time.Sleep(time.Millisecond * 500)
-	_ = C.now()
+	// _ = C.now()
+	// time.Sleep(time.Millisecond * 500)
+	// _ = C.now()
 	_ = C.close()
 
 	client, err := clockboundclient.New()
