@@ -4,7 +4,7 @@
 char const *shm_path = CLOCKBOUND_SHM_DEFAULT_PATH;
 clockbound_ctx* ctx = NULL;
 
-void hello() int {
+int hello() {
   clockbound_err open_err;
   clockbound_err const *err;
   clockbound_now_result first;
@@ -32,7 +32,6 @@ void hello() int {
          first.latest.tv_nsec, format_clock_status(first.clock_status));
 
   if (ctx != NULL) {
-    // Finally, close clockbound.
     err = clockbound_close(ctx);
     if (err) {
       print_clockbound_err("clockbound_close", err);
