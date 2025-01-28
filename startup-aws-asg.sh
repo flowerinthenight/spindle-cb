@@ -2,7 +2,7 @@
 yum install -y gcc git
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 git clone https://github.com/aws/clock-bound
-cd clock-bound/clock-bound-d/
+cd /clock-bound/clock-bound-d/
 /root/.cargo/bin/cargo build --release
 echo '# Ref: https://github.com/aws/clock-bound/tree/main/clock-bound-d' >> /etc/chrony.d/clockbound.conf
 echo 'maxclockerror 50' >> /etc/chrony.d/clockbound.conf
@@ -34,6 +34,12 @@ systemctl daemon-reload
 systemctl enable clockbound
 systemctl start clockbound
 systemctl status clockbound
+
+cd /clock-bound/clock-bound-ffi/
+/root/.cargo/bin/cargo build --release
+cp /clock-bound/clock-bound-ffi/include/clockbound.h /usr/include/
+cp /clock-bound/target/release/libclockbound.a /usr/lib/
+cp /clock-bound/target/release/libclockbound.so /usr/lib/
 
 wget https://github.com/flowerinthenight/spindle-cb/releases/download/v0.1.4/spindle-v0.1.4-x86_64-linux.tar.gz
 tar -xzvf spindle-v0.1.4-x86_64-linux.tar.gz

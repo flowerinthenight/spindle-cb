@@ -21,6 +21,8 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan error, 1)
 	ticker := time.NewTicker(time.Second * 3)
+	first := make(chan struct{}, 1)
+	first <- struct{}{}
 
 	go func() {
 		for {
@@ -28,6 +30,7 @@ func main() {
 			case <-ctx.Done():
 				done <- nil
 				return
+			case <-first:
 			case <-ticker.C:
 			}
 
