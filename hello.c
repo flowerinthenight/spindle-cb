@@ -39,7 +39,23 @@ int hello() {
     }
   }
 
-  return 0
+  return 0;
+}
+
+/*
+ * Helper function to convert clock status codes into a human readable version.
+ */
+char *format_clock_status(clockbound_clock_status status) {
+  switch (status) {
+  case CLOCKBOUND_STA_UNKNOWN:
+    return "UNKNOWN";
+  case CLOCKBOUND_STA_SYNCHRONIZED:
+    return "SYNCHRONIZED";
+  case CLOCKBOUND_STA_FREE_RUNNING:
+    return "FREE_RUNNING";
+  default:
+    return "BAD CLOCK STATUS";
+  }
 }
 
 /*
