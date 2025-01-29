@@ -190,13 +190,14 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 
 		// Attempt first ever lock. Only one node should be able to do this successfully.
 		if initial.Load() == 1 {
-			l.logger.Printf("do first ever lock...")
+			l.logger.Printf("do first ever lock")
 			prefix := "init:"
 			now, err := l.cb.Now()
 			if err != nil {
 				l.logger.Printf("%v Now failed (info only): %v", prefix, err)
 			}
 
+			l.logger.Printf("after now")
 			mt := middleTime(now)
 			var q strings.Builder
 			fmt.Fprintf(&q, "insert into %s ", l.table)
