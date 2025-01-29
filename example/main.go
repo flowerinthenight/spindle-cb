@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"github.com/flowerinthenight/spindle-cb"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func main() {
