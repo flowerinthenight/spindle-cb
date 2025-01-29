@@ -16,7 +16,6 @@ import (
 	"github.com/flowerinthenight/clockbound-ffi-go"
 	"github.com/google/uuid"
 	gaxv2 "github.com/googleapis/gax-go/v2"
-	"github.com/jackc/pgx/v5"
 	"google.golang.org/api/iterator"
 )
 
@@ -71,7 +70,6 @@ func WithLogger(v *log.Logger) Option { return withLogger{v} }
 type Lock struct {
 	db       *sql.DB
 	cb       *clockbound.Client
-	pg       *pgx.Conn
 	table    string // table name
 	name     string // lock name
 	id       string // unique id for this instance
@@ -89,6 +87,13 @@ type Lock struct {
 // Run starts the main lock loop which can be canceled using the input context. You can
 // provide an optional done channel if you want to be notified when the loop is done.
 func (l *Lock) Run(ctx context.Context, done ...chan error) error {
+	l.cb = clockbound.New()
+	_, err := l.cb.Now() // ensure
+	if err != nil {
+		return fmt.Errorf("clockbound failed: %w", err)
+	}
+
+	defer l.cb.Close()
 	var leader atomic.Int32 // for heartbeat
 	go func() {
 		min := (time.Millisecond * time.Duration(l.duration)) / 2
@@ -188,6 +193,17 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 		// token. Only one node should be able to do this successfully.
 		if initial.Load() == 1 {
 			prefix := "init:"
+
+			var q strings.Builder
+			fmt.Fprintf(&q, "insert %s ", l.table)
+			fmt.Fprintf(&q, "(name, heartbeat, token, writer) ")
+			fmt.Fprintf(&q, "values (")
+			fmt.Fprintf(&q, "'%s',", l.name)
+			fmt.Fprintf(&q, "PENDING_COMMIT_TIMESTAMP(),")
+			fmt.Fprintf(&q, "PENDING_COMMIT_TIMESTAMP(),")
+			fmt.Fprintf(&q, "'%s')", l.id)
+
+			now, err := l.db.Exec("")
 			cts, err := l.db.ReadWriteTransaction(context.Background(),
 				func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 					var q strings.Builder
@@ -500,7 +516,7 @@ func (l *Lock) heartbeat() {
 }
 
 // New returns a lock object with a default of 10s lease duration.
-func New(db *spanner.Client, table, name string, o ...Option) *Lock {
+func New(db *sql.DB, table, name string, o ...Option) *Lock {
 	lock := &Lock{
 		db:       db,
 		table:    table,

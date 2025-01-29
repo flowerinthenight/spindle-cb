@@ -42,24 +42,24 @@ func main() {
 
 			var q strings.Builder
 
-			// fmt.Fprintf(&q, "insert into locktable (name, heartbeat, token, writer) ")
-			// fmt.Fprintf(&q, "values ('spindle', $1, $2, 'writer_me');")
-			// tag, err := conn.Exec(pgctx, q.String(), time.Now(), time.Now())
-			// if err != nil {
-			// 	log.Println("Exec failed:", err)
-			// } else {
-			// 	log.Println(tag.String())
-			// }
-
-			fmt.Fprintf(&q, "select * from locktable where name = 'spindle';")
-			var name, writer string
-			var hb, token time.Time
-			err = db.QueryRow(q.String()).Scan(&name, &hb, &token, &writer)
+			fmt.Fprintf(&q, "insert into locktable (name, heartbeat, token, writer) ")
+			fmt.Fprintf(&q, "values ('spindle_tmp', $1, $2, 'writer_me');")
+			_, err = db.Exec(q.String(), time.Now(), time.Now())
 			if err != nil {
-				log.Println("QueryRow failed:", err)
+				log.Println("Exec failed:", err)
 			} else {
-				log.Println(name, hb, token, writer)
+				log.Println("OK")
 			}
+
+			// fmt.Fprintf(&q, "select * from locktable where name = 'spindle';")
+			// var name, writer string
+			// var hb, token time.Time
+			// err = db.QueryRow(q.String()).Scan(&name, &hb, &token, &writer)
+			// if err != nil {
+			// 	log.Println("QueryRow failed:", err)
+			// } else {
+			// 	log.Println(name, hb, token, writer)
+			// }
 		}()
 	}
 
