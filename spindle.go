@@ -85,14 +85,6 @@ type Lock struct {
 // Run starts the main lock loop which can be canceled using the input context. You can
 // provide an optional done channel if you want to be notified when the loop is done.
 func (l *Lock) Run(ctx context.Context, done ...chan error) error {
-	l.cb = clockbound.New()
-	_, err := l.cb.Now() // ensure
-	if err != nil {
-		l.logger.Printf("clockbound failed (id=%v): %v", l.id, err)
-		return fmt.Errorf("clockbound failed: %w", err)
-	}
-
-	defer l.cb.Close()
 	var leader atomic.Int32 // for heartbeat
 	go func() {
 		min := (time.Millisecond * time.Duration(l.duration)) / 2
@@ -277,6 +269,15 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 	first <- struct{}{}
 
 	go func() {
+		l.cb = clockbound.New()
+		_, err := l.cb.Now() // ensure
+		if err != nil {
+			l.logger.Printf("clockbound failed (id=%v): %v", l.id, err)
+			return
+		}
+
+		defer l.cb.Close()
+
 		for {
 			select {
 			case <-first: // immediately before 1st tick
