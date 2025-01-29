@@ -193,34 +193,41 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 		// token. Only one node should be able to do this successfully.
 		if initial.Load() == 1 {
 			prefix := "init:"
+			now, err := l.cb.Now()
+			if err != nil {
+				l.logger.Printf("%v Now failed (info only): %v", prefix, err)
+			}
 
 			var q strings.Builder
-			fmt.Fprintf(&q, "insert %s ", l.table)
+			fmt.Fprintf(&q, "insert into %s ", l.table)
 			fmt.Fprintf(&q, "(name, heartbeat, token, writer) ")
 			fmt.Fprintf(&q, "values (")
 			fmt.Fprintf(&q, "'%s',", l.name)
-			fmt.Fprintf(&q, "PENDING_COMMIT_TIMESTAMP(),")
-			fmt.Fprintf(&q, "PENDING_COMMIT_TIMESTAMP(),")
+			fmt.Fprintf(&q, "$1,")
+			fmt.Fprintf(&q, "$2,")
 			fmt.Fprintf(&q, "'%s')", l.id)
+			_, err = l.db.Exec(q.String(), now.Earliest, now.Earliest)
+			if err != nil {
+				l.logger.Printf("%v Exec failed (info only): %v", prefix, err)
+			}
 
-			now, err := l.db.Exec("")
-			cts, err := l.db.ReadWriteTransaction(context.Background(),
-				func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-					var q strings.Builder
-					fmt.Fprintf(&q, "insert %s ", l.table)
-					fmt.Fprintf(&q, "(name, heartbeat, token, writer) ")
-					fmt.Fprintf(&q, "values (")
-					fmt.Fprintf(&q, "'%s',", l.name)
-					fmt.Fprintf(&q, "PENDING_COMMIT_TIMESTAMP(),")
-					fmt.Fprintf(&q, "PENDING_COMMIT_TIMESTAMP(),")
-					fmt.Fprintf(&q, "'%s')", l.id)
-					_, err := txn.Update(ctx, spanner.Statement{SQL: q.String()})
-					return err
-				},
-			)
+			// cts, err := l.db.ReadWriteTransaction(context.Background(),
+			// 	func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+			// 		var q strings.Builder
+			// 		fmt.Fprintf(&q, "insert %s ", l.table)
+			// 		fmt.Fprintf(&q, "(name, heartbeat, token, writer) ")
+			// 		fmt.Fprintf(&q, "values (")
+			// 		fmt.Fprintf(&q, "'%s',", l.name)
+			// 		fmt.Fprintf(&q, "PENDING_COMMIT_TIMESTAMP(),")
+			// 		fmt.Fprintf(&q, "PENDING_COMMIT_TIMESTAMP(),")
+			// 		fmt.Fprintf(&q, "'%s')", l.id)
+			// 		_, err := txn.Update(ctx, spanner.Statement{SQL: q.String()})
+			// 		return err
+			// 	},
+			// )
 
 			if err == nil {
-				l.setToken(&cts)
+				l.setToken(&now.Earliest)
 				l.logger.Printf("%v got the lock with token %v", prefix, l.token())
 				return
 			}

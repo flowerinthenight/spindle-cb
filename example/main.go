@@ -42,24 +42,24 @@ func main() {
 
 			var q strings.Builder
 
-			fmt.Fprintf(&q, "insert into locktable (name, heartbeat, token, writer) ")
-			fmt.Fprintf(&q, "values ('spindle_tmp', $1, $2, 'writer_me');")
-			_, err = db.Exec(q.String(), time.Now(), time.Now())
-			if err != nil {
-				log.Println("Exec failed:", err)
-			} else {
-				log.Println("OK")
-			}
-
-			// fmt.Fprintf(&q, "select * from locktable where name = 'spindle';")
-			// var name, writer string
-			// var hb, token time.Time
-			// err = db.QueryRow(q.String()).Scan(&name, &hb, &token, &writer)
+			// fmt.Fprintf(&q, "insert into locktable (name, heartbeat, token, writer) ")
+			// fmt.Fprintf(&q, "values ('spindle_tmp', $1, $2, 'writer_me');")
+			// _, err = db.Exec(q.String(), time.Now(), time.Now())
 			// if err != nil {
-			// 	log.Println("QueryRow failed:", err)
+			// 	log.Println("Exec failed:", err)
 			// } else {
-			// 	log.Println(name, hb, token, writer)
+			// 	log.Println("OK")
 			// }
+
+			fmt.Fprintf(&q, "select * from locktable where name = 'spindle';")
+			var name, writer string
+			var hb, token time.Time
+			err = db.QueryRow(q.String()).Scan(&name, &hb, &token, &writer)
+			if err != nil {
+				log.Println("QueryRow failed:", err)
+			} else {
+				log.Println(name, hb, token, writer)
+			}
 		}()
 	}
 
@@ -88,6 +88,7 @@ func main() {
 
 			log.Printf("earliest: %v\n", now.Earliest.Format(time.RFC3339Nano))
 			log.Printf("latest  : %v\n", now.Latest.Format(time.RFC3339Nano))
+			log.Printf("mid     : %v\n", now.Earliest.Add(now.Latest.Sub(now.Earliest)/2))
 			log.Printf("range: %v\n", now.Latest.Sub(now.Earliest))
 			log.Printf("status: %v\n", now.Status)
 			log.Println("")
