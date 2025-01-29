@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
@@ -10,8 +11,8 @@ import (
 	"syscall"
 	"time"
 
-	clockbound "github.com/flowerinthenight/clockbound-ffi-go"
-	"github.com/jackc/pgx/v5"
+	"github.com/flowerinthenight/clockbound-ffi-go"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func main() {
@@ -25,15 +26,14 @@ func main() {
 			// 	writer TEXT
 			// );
 
-			pgctx := context.Background()
-			conn, err := pgx.Connect(pgctx, os.Args[1])
+			db, err := sql.Open("pgx", os.Args[1])
 			if err != nil {
 				log.Println("Connect failed:", err)
 				return
 			}
 
-			defer conn.Close(pgctx)
-			err = conn.Ping(pgctx)
+			defer db.Close()
+			err = db.Ping()
 			if err != nil {
 				log.Println("Ping failed:", err)
 			} else {
@@ -54,7 +54,7 @@ func main() {
 			fmt.Fprintf(&q, "select * from locktable where name = 'spindle';")
 			var name, writer string
 			var hb, token time.Time
-			err = conn.QueryRow(pgctx, q.String()).Scan(&name, &hb, &token, &writer)
+			err = db.QueryRow(q.String()).Scan(&name, &hb, &token, &writer)
 			if err != nil {
 				log.Println("QueryRow failed:", err)
 			} else {

@@ -9,6 +9,7 @@
 *.dylib
 bin/
 spindle-cb
+example/example
 
 # Test binary, built with `go test -c`
 *.test
