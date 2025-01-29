@@ -30,7 +30,9 @@ func main() {
 			case <-ticker.C:
 			}
 
+			start := time.Now()
 			now, err := cb.Now()
+			took := time.Since(start)
 			if err != nil {
 				log.Println("Now failed:", err)
 				continue
@@ -40,6 +42,7 @@ func main() {
 			log.Printf("latest  : %v\n", now.Latest.Format(time.RFC3339Nano))
 			log.Printf("range: %v\n", now.Latest.Sub(now.Earliest))
 			log.Printf("status: %v\n", now.Status)
+			log.Println("call took %v:", took)
 			log.Println("")
 		}
 	}()
