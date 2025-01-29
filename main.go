@@ -38,7 +38,7 @@ func main() {
 				log.Println("PING!")
 			}
 
-			tag, err := conn.Exec(pgctx, "insert into locktable (name, heartbeat, token, writer) values ('spindle_name', '2021-10-10 01:01:01', '2021-10-10 01:01:01', 'writer_me');")
+			tag, err := conn.Exec(pgctx, "insert into locktable (name, heartbeat, token, writer) values ('spindle_name', $1, $2, 'writer_me');", time.Now(), time.Now())
 			if err != nil {
 				log.Println("Exec failed:", err)
 			} else {
