@@ -392,9 +392,9 @@ func (l *Lock) checkLock() (uint64, int64, error) {
 		var tokenTime time.Time
 		reterr := l.db.QueryRow(q.String(), l.name).Scan(&rawDiff, &tokenTime)
 		if reterr == nil {
-			v, err := strconv.Atoi(rawDiff)
+			v, err := strconv.ParseFloat(rawDiff, 64)
 			if err != nil {
-				l.logger.Println("Atoi failed: %v", err)
+				l.logger.Printf("ParseFloat failed: %v", err)
 			}
 
 			diff = int64(v)
