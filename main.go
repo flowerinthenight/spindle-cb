@@ -13,22 +13,22 @@ import (
 )
 
 func main() {
-	log.Println("args:", os.Args)
+	if len(os.Args) > 1 {
+		func() {
+			pgctx := context.Background()
+			conn, err := pgx.Connect(pgctx, os.Args[1])
+			if err != nil {
+				log.Println("Connect failed:", err)
+				return
+			}
 
-	if false {
-		pgctx := context.Background()
-		conn, err := pgx.Connect(pgctx, os.Getenv("DATABASE_URL"))
-		if err != nil {
-			log.Println("Connect failed:", err)
-			return
-		}
+			err = conn.Ping(pgctx)
+			if err != nil {
+				log.Println("Ping failed:", err)
+			}
 
-		err = conn.Ping(pgctx)
-		if err != nil {
-			log.Println("Ping failed:", err)
-		}
-
-		defer conn.Close(pgctx)
+			defer conn.Close(pgctx)
+		}()
 	}
 
 	client := clockbound.New()
