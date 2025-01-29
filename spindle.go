@@ -11,12 +11,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"cloud.google.com/go/spanner"
 	"github.com/cespare/xxhash/v2"
 	"github.com/flowerinthenight/clockbound-ffi-go"
 	"github.com/google/uuid"
 	gaxv2 "github.com/googleapis/gax-go/v2"
-	"google.golang.org/api/iterator"
 )
 
 var (
@@ -189,8 +187,7 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 			return
 		}
 
-		// Attempt first ever lock. The return commit timestamp will be our fencing
-		// token. Only one node should be able to do this successfully.
+		// Attempt first ever lock. Only one node should be able to do this successfully.
 		if initial.Load() == 1 {
 			prefix := "init:"
 			now, err := l.cb.Now()
@@ -198,6 +195,7 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 				l.logger.Printf("%v Now failed (info only): %v", prefix, err)
 			}
 
+			mt := middleTime(now)
 			var q strings.Builder
 			fmt.Fprintf(&q, "insert into %s ", l.table)
 			fmt.Fprintf(&q, "(name, heartbeat, token, writer) ")
@@ -206,28 +204,13 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 			fmt.Fprintf(&q, "$1,")
 			fmt.Fprintf(&q, "$2,")
 			fmt.Fprintf(&q, "'%s')", l.id)
-			_, err = l.db.Exec(q.String(), now.Earliest, now.Earliest)
+			_, err = l.db.Exec(q.String(), mt, mt)
 			if err != nil {
 				l.logger.Printf("%v Exec failed (info only): %v", prefix, err)
 			}
 
-			// cts, err := l.db.ReadWriteTransaction(context.Background(),
-			// 	func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-			// 		var q strings.Builder
-			// 		fmt.Fprintf(&q, "insert %s ", l.table)
-			// 		fmt.Fprintf(&q, "(name, heartbeat, token, writer) ")
-			// 		fmt.Fprintf(&q, "values (")
-			// 		fmt.Fprintf(&q, "'%s',", l.name)
-			// 		fmt.Fprintf(&q, "PENDING_COMMIT_TIMESTAMP(),")
-			// 		fmt.Fprintf(&q, "PENDING_COMMIT_TIMESTAMP(),")
-			// 		fmt.Fprintf(&q, "'%s')", l.id)
-			// 		_, err := txn.Update(ctx, spanner.Statement{SQL: q.String()})
-			// 		return err
-			// 	},
-			// )
-
 			if err == nil {
-				l.setToken(&now.Earliest)
+				l.setToken(&mt)
 				l.logger.Printf("%v got the lock with token %v", prefix, l.token())
 				return
 			}
@@ -250,49 +233,37 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 			}
 
 			// Attempt to grab the next lock. Multiple nodes could potentially do this successfully.
-			nts, err := l.db.ReadWriteTransaction(context.Background(),
-				func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-					nxt := fmt.Sprintf("%v_%v", l.name, token)
-					var q strings.Builder
-					fmt.Fprintf(&q, "insert %s ", l.table)
-					fmt.Fprintf(&q, "(name) ")
-					fmt.Fprintf(&q, "values ('%s')", nxt)
-					_, err := txn.Update(ctx, spanner.Statement{SQL: q.String()})
-					return err
-				},
-			)
+			now, err := l.cb.Now()
+			if err != nil {
+				l.logger.Printf("%v Now failed (info only): %v", prefix, err)
+			}
 
+			mt := middleTime(now)
+			nxt := fmt.Sprintf("%v_%v", l.name, token)
+			var q strings.Builder
+			fmt.Fprintf(&q, "insert into %s ", l.table)
+			fmt.Fprintf(&q, "(name) ")
+			fmt.Fprintf(&q, "values ('%s')", nxt)
+			_, err = l.db.Exec(q.String(), mt, mt)
 			if err == nil {
 				// We got the lock. Attempt to update the current token to this commit timestamp.
-				_, err := l.db.ReadWriteTransaction(context.Background(),
-					func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-						var q strings.Builder
-						fmt.Fprintf(&q, "update %s set ", l.table)
-						fmt.Fprintf(&q, "heartbeat = PENDING_COMMIT_TIMESTAMP(), ")
-						fmt.Fprintf(&q, "token = @token, ")
-						fmt.Fprintf(&q, "writer = @writer ")
-						fmt.Fprintf(&q, "where name = @name")
-						stmt := spanner.Statement{
-							SQL: q.String(),
-							Params: map[string]interface{}{
-								"name":   l.name,
-								"token":  nts,
-								"writer": l.id,
-							},
-						}
-
-						_, err := txn.Update(ctx, stmt)
-						return err
-					},
-				)
-
+				var q strings.Builder
+				fmt.Fprintf(&q, "update %s set ", l.table)
+				fmt.Fprintf(&q, "heartbeat = $1, ")
+				fmt.Fprintf(&q, "token = $2, ")
+				fmt.Fprintf(&q, "writer = $3 ")
+				fmt.Fprintf(&q, "where name = $4")
+				_, err = l.db.Exec(q.String(), mt, mt, l.id, l.name)
 				if err != nil {
 					l.logger.Printf("%v update token failed: %v", prefix, err)
 					return
 				}
 
-				l.setToken(&nts) // doesn't mean we're leader
+				l.setToken(&mt) // doesn't mean we're leader
 				l.logger.Printf("%v got the lock with token %v", prefix, l.token())
+			} else {
+				// TODO: Can remove else section.
+				l.logger.Printf("%v Exec failed (info only): %v", prefix, err)
 			}
 		}
 	}
@@ -381,8 +352,8 @@ func (l *Lock) Duration() int64 { return l.duration }
 // Iterations returns the number of iterations done by the main loop.
 func (l *Lock) Iterations() int64 { return l.iter.Load() }
 
-// Client returns the Spanner client.
-func (l *Lock) Client() *spanner.Client { return l.db }
+// Client returns the SQL client.
+func (l *Lock) Client() *sql.DB { return l.db }
 
 func (l *Lock) token() uint64 {
 	l.mtx.Lock()
@@ -401,11 +372,6 @@ func (l *Lock) setToken(v *time.Time) {
 	l.ttoken = v
 }
 
-type diffT struct {
-	Diff  spanner.NullInt64
-	Token spanner.NullTime
-}
-
 func (l *Lock) checkLock() (uint64, int64, error) {
 	var token string
 	var diff int64
@@ -413,113 +379,67 @@ func (l *Lock) checkLock() (uint64, int64, error) {
 	err := func() error {
 		var q strings.Builder
 		fmt.Fprintf(&q, "select ")
-		fmt.Fprintf(&q, "timestamp_diff(current_timestamp(), heartbeat, millisecond) as diff, ")
+		fmt.Fprintf(&q, "extract(milliseconds from (token - heartbeat)) as diff, ")
 		fmt.Fprintf(&q, "token ")
 		fmt.Fprintf(&q, "from %s ", l.table)
-		fmt.Fprintf(&q, "where name = @name")
-		stmt := spanner.Statement{
-			SQL:    q.String(),
-			Params: map[string]interface{}{"name": l.name},
+		fmt.Fprintf(&q, "where name = $1")
+		var rawDiff int64
+		var tokenTime time.Time
+		reterr := l.db.QueryRow(q.String(), l.name).Scan(&rawDiff, &tokenTime)
+		if reterr == nil {
+			diff = rawDiff
+			token = tokenTime.Format(time.RFC3339Nano)
 		}
 
-		var retErr error
-		iter := l.db.Single().Query(context.Background(), stmt)
-		defer iter.Stop()
-		for {
-			row, err := iter.Next()
-			if err == iterator.Done {
-				break
-			}
-
-			if err != nil {
-				retErr = err
-				break
-			}
-
-			var v diffT
-			err = row.ToStruct(&v)
-			if err != nil {
-				return err
-			}
-
-			diff = v.Diff.Int64
-			token = v.Token.Time.UTC().Format(time.RFC3339Nano)
-		}
-
-		return retErr
+		return reterr
 	}()
 
 	return xxhash.Sum64String(token), diff, err
 }
 
-type tokenT struct {
-	Token  spanner.NullTime
-	Writer spanner.NullString
-}
-
 func (l *Lock) getCurrentToken() (uint64, string, error) {
 	var q strings.Builder
 	fmt.Fprintf(&q, "select token, writer from %s ", l.table)
-	fmt.Fprintf(&q, "where name = @name")
-	stmt := spanner.Statement{
-		SQL:    q.String(),
-		Params: map[string]interface{}{"name": l.name},
+	fmt.Fprintf(&q, "where name = $1")
+	var token time.Time
+	var writer string
+	err := l.db.QueryRow(q.String(), l.name).Scan(&token, &writer)
+	if err != nil {
+		return 0, writer, err
 	}
 
-	var token, writer string
-	iter := l.db.Single().Query(context.Background(), stmt)
-	defer iter.Stop()
-	for {
-		row, err := iter.Next()
-		if err == iterator.Done {
-			break
-		}
-
-		if err != nil {
-			return 0, writer, err
-		}
-
-		var v tokenT
-		err = row.ToStruct(&v)
-		if err != nil {
-			return 0, writer, err
-		}
-
-		token = v.Token.Time.UTC().Format(time.RFC3339Nano)
-		if v.Writer.Valid {
-			writer = v.Writer.String()
-		}
-	}
-
-	return xxhash.Sum64String(token), writer, nil
+	ts := token.Format(time.RFC3339Nano)
+	return xxhash.Sum64String(ts), writer, nil
 }
 
 func (l *Lock) heartbeat() {
-	l.db.ReadWriteTransaction(context.Background(),
-		func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-			var q strings.Builder
-			fmt.Fprintf(&q, "update %s ", l.table)
-			fmt.Fprintf(&q, "set heartbeat = PENDING_COMMIT_TIMESTAMP() ")
-			fmt.Fprintf(&q, "where name = @name")
-			stmt := spanner.Statement{
-				SQL:    q.String(),
-				Params: map[string]interface{}{"name": l.name},
-			}
+	func() {
+		now, err := l.cb.Now()
+		if err != nil {
+			l.logger.Printf("[hb] Now failed (id=%v): %v", l.id, err)
+		}
 
-			_, err := txn.Update(ctx, stmt)
-			if err != nil {
-				l.logger.Printf("heartbeat failed: id=%v, err=%v", l.id, err)
-			}
+		var q strings.Builder
+		fmt.Fprintf(&q, "update %s ", l.table)
+		fmt.Fprintf(&q, "set heartbeat = $1 ")
+		fmt.Fprintf(&q, "where name = $2")
+		_, err = l.db.Exec(q.String(), now.Earliest, l.name)
+		if err != nil {
+			l.logger.Printf("heartbeat failed (id=%v): %v", l.id, err)
+		}
+	}()
 
-			// Best-effort cleanup.
-			rm := fmt.Sprintf("%v_", l.name)
-			q.Reset()
-			fmt.Fprintf(&q, "delete from %s ", l.table)
-			fmt.Fprintf(&q, "where starts_with(name, '%s')", rm)
-			txn.Update(ctx, spanner.Statement{SQL: q.String()})
-			return err
-		},
-	)
+	func() {
+		var q strings.Builder
+		rm := fmt.Sprintf("%v_", l.name)
+		fmt.Fprintf(&q, "delete from %s ", l.table)
+		fmt.Fprintf(&q, "where starts_with(name, '%s')", rm)
+		_, err := l.db.Exec(q.String())
+		if err != nil {
+			// TODO: Can be removed.
+			l.logger.Printf("hb/cleanup failed (id=%v): %v", l.id, err)
+		}
+	}()
 }
 
 // New returns a lock object with a default of 10s lease duration.
@@ -548,4 +468,8 @@ func New(db *sql.DB, table, name string, o ...Option) *Lock {
 	}
 
 	return lock
+}
+
+func middleTime(now clockbound.Now) time.Time {
+	return now.Earliest.Add(now.Latest.Sub(now.Earliest) / 2)
 }

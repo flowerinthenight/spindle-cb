@@ -10,6 +10,7 @@
 bin/
 spindle-cb
 example/example
+scratch/scratch
 
 # Test binary, built with `go test -c`
 *.test

@@ -3,108 +3,57 @@ package main
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"flag"
 	"log"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
-	"time"
 
-	"github.com/flowerinthenight/clockbound-ffi-go"
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/flowerinthenight/spindle-cb"
 )
 
 func main() {
-	if len(os.Args) > 1 {
-		func() {
-			// CREATE DATABASE spindle;
-			// CREATE TABLE locktable (
-			// 	name TEXT PRIMARY KEY,
-			// 	heartbeat TIMESTAMP,
-			// 	token TIMESTAMP,
-			// 	writer TEXT
-			// );
+	dbstr := flag.String("db", "", "database connection string")
+	table := flag.String("table", "locktable", "table name")
+	name := flag.String("name", "mylock", "lock name")
+	flag.Parse()
 
-			db, err := sql.Open("pgx", os.Args[1])
-			if err != nil {
-				log.Println("Connect failed:", err)
-				return
-			}
-
-			defer db.Close()
-			err = db.Ping()
-			if err != nil {
-				log.Println("Ping failed:", err)
-			} else {
-				log.Println("PING!")
-			}
-
-			var q strings.Builder
-
-			// fmt.Fprintf(&q, "insert into locktable (name, heartbeat, token, writer) ")
-			// fmt.Fprintf(&q, "values ('spindle_tmp', $1, $2, 'writer_me');")
-			// _, err = db.Exec(q.String(), time.Now(), time.Now())
-			// if err != nil {
-			// 	log.Println("Exec failed:", err)
-			// } else {
-			// 	log.Println("OK")
-			// }
-
-			fmt.Fprintf(&q, "select * from locktable where name = 'spindle';")
-			var name, writer string
-			var hb, token time.Time
-			err = db.QueryRow(q.String()).Scan(&name, &hb, &token, &writer)
-			if err != nil {
-				log.Println("QueryRow failed:", err)
-			} else {
-				log.Println(name, hb, token, writer)
-			}
-		}()
+	// To run, update the database name, table name, and, optionally, the lock name.
+	// It is assumed that your environment is able to authenticate to Spanner via
+	// GOOGLE_APPLICATION_CREDENTIALS environment variable.
+	db, err := sql.Open("pgx", *dbstr)
+	if err != nil {
+		log.Println("Open failed:", err)
+		return
 	}
 
-	client := clockbound.New()
-	ctx, cancel := context.WithCancel(context.Background())
+	defer db.Close()
+	err = db.Ping()
+	if err != nil {
+		log.Println("Ping failed:", err)
+	} else {
+		log.Println("PING!")
+	}
+
+	quit, cancel := context.WithCancel(context.Background())
+	lock := spindle.New(db,
+		*table,
+		*name,
+		spindle.WithDuration(10000),
+		spindle.WithLeaderCallback(nil, func(d interface{}, m []byte) {
+			log.Println("callback:", string(m))
+		}),
+	)
+
 	done := make(chan error, 1)
-	ticker := time.NewTicker(time.Second * 3)
-	first := make(chan struct{}, 1)
-	first <- struct{}{}
+	lock.Run(quit, done) // start main loop
 
-	go func() {
-		for {
-			select {
-			case <-ctx.Done():
-				done <- nil
-				return
-			case <-first:
-			case <-ticker.C:
-			}
-
-			now, err := client.Now()
-			if err != nil {
-				log.Println("Now failed:", err)
-				continue
-			}
-
-			log.Printf("earliest: %v\n", now.Earliest.Format(time.RFC3339Nano))
-			log.Printf("latest  : %v\n", now.Latest.Format(time.RFC3339Nano))
-			log.Printf("mid     : %v\n", now.Earliest.Add(now.Latest.Sub(now.Earliest)/2))
-			log.Printf("range: %v\n", now.Latest.Sub(now.Earliest))
-			log.Printf("status: %v\n", now.Status)
-			log.Println("")
-		}
-	}()
-
-	// Interrupt handler.
 	go func() {
 		sigch := make(chan os.Signal, 1)
 		signal.Notify(sigch, syscall.SIGINT, syscall.SIGTERM)
-		log.Println("signal:", <-sigch)
+		<-sigch
 		cancel()
 	}()
 
 	<-done
-
-	ticker.Stop()
-	client.Close()
 }
