@@ -25,6 +25,8 @@ func main() {
 			err = conn.Ping(pgctx)
 			if err != nil {
 				log.Println("Ping failed:", err)
+			} else {
+				log.Println("PING!")
 			}
 
 			defer conn.Close(pgctx)
