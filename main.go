@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	cb := clockbound.New()
+	client := clockbound.New()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan error, 1)
@@ -30,7 +30,7 @@ func main() {
 			case <-ticker.C:
 			}
 
-			now, err := cb.Now()
+			now, err := client.Now()
 			if err != nil {
 				log.Println("Now failed:", err)
 				continue
@@ -55,5 +55,5 @@ func main() {
 	<-done
 
 	ticker.Stop()
-	cb.Close()
+	client.Close()
 }
