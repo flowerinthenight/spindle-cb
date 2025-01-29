@@ -88,6 +88,7 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 	l.cb = clockbound.New()
 	_, err := l.cb.Now() // ensure
 	if err != nil {
+		l.logger.Printf("clockbound failed (id=%v): %v", l.id, err)
 		return fmt.Errorf("clockbound failed: %w", err)
 	}
 
@@ -389,6 +390,9 @@ func (l *Lock) checkLock() (uint64, int64, error) {
 		if reterr == nil {
 			diff = rawDiff
 			token = tokenTime.Format(time.RFC3339Nano)
+		} else {
+			// TODO: Can remove section.
+			l.logger.Printf("QueryRow failed (id=%v): %v", l.id, reterr)
 		}
 
 		return reterr
