@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -387,11 +388,16 @@ func (l *Lock) checkLock() (uint64, int64, error) {
 		fmt.Fprintf(&q, "token ")
 		fmt.Fprintf(&q, "from %s ", l.table)
 		fmt.Fprintf(&q, "where name = $1")
-		var rawDiff int64
+		var rawDiff string
 		var tokenTime time.Time
 		reterr := l.db.QueryRow(q.String(), l.name).Scan(&rawDiff, &tokenTime)
 		if reterr == nil {
-			diff = rawDiff
+			v, err := strconv.Atoi(rawDiff)
+			if err != nil {
+				l.logger.Println("Atoi failed: %v", err)
+			}
+
+			diff = int64(v)
 			token = tokenTime.Format(time.RFC3339Nano)
 		}
 
