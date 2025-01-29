@@ -239,7 +239,7 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 			fmt.Fprintf(&q, "insert into %s ", l.table)
 			fmt.Fprintf(&q, "(name) ")
 			fmt.Fprintf(&q, "values ('%s')", nxt)
-			_, err = l.db.Exec(q.String(), mt, mt)
+			_, err = l.db.Exec(q.String())
 			if err == nil {
 				// We got the lock. Attempt to update the current token to this commit timestamp.
 				var q strings.Builder
