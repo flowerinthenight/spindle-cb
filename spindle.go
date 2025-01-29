@@ -133,7 +133,7 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 		// See if there is an active leased lock (could be us, could be someone else).
 		token, diff, err := l.checkLock()
 		if err != nil {
-			l.logger.Println(err)
+			l.logger.Printf("checkLock failed (id=%v): %v", l.id, err)
 			return true // err on safer side
 		}
 
