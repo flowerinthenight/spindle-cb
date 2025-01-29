@@ -15,6 +15,14 @@ import (
 func main() {
 	if len(os.Args) > 1 {
 		func() {
+			// CREATE DATABASE spindle;
+			// CREATE TABLE locktable (
+			// 	name TEXT PRIMARY KEY,
+			// 	heartbeat TIMESTAMP,
+			// 	token TIMESTAMP,
+			// 	writer TEXT
+			// );
+
 			pgctx := context.Background()
 			conn, err := pgx.Connect(pgctx, os.Args[1])
 			if err != nil {
@@ -22,6 +30,7 @@ func main() {
 				return
 			}
 
+			defer conn.Close(pgctx)
 			err = conn.Ping(pgctx)
 			if err != nil {
 				log.Println("Ping failed:", err)
@@ -29,7 +38,12 @@ func main() {
 				log.Println("PING!")
 			}
 
-			defer conn.Close(pgctx)
+			tag, err := conn.Exec(pgctx, "insert into locktable (name, heartbeat, token, writer) values ('spindle_name', '2021-10-10 01:01:01', '2021-10-10 01:01:01', 'writer_me');")
+			if err != nil {
+				log.Println("Exec failed:", err)
+			} else {
+				log.Println(tag.String())
+			}
 		}()
 	}
 
