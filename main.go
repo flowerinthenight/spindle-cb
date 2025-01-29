@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -38,11 +40,25 @@ func main() {
 				log.Println("PING!")
 			}
 
-			tag, err := conn.Exec(pgctx, "insert into locktable (name, heartbeat, token, writer) values ('spindle', $1, $2, 'writer_me');", time.Now(), time.Now())
+			var q strings.Builder
+
+			// fmt.Fprintf(&q, "insert into locktable (name, heartbeat, token, writer) ")
+			// fmt.Fprintf(&q, "values ('spindle', $1, $2, 'writer_me');")
+			// tag, err := conn.Exec(pgctx, q.String(), time.Now(), time.Now())
+			// if err != nil {
+			// 	log.Println("Exec failed:", err)
+			// } else {
+			// 	log.Println(tag.String())
+			// }
+
+			fmt.Fprintf(&q, "select * from locktable where name = 'spindle';")
+			var name, writer string
+			var hb, token time.Time
+			err = conn.QueryRow(pgctx, q.String()).Scan(&name, &hb, &token, &writer)
 			if err != nil {
-				log.Println("Exec failed:", err)
+				log.Println("QueryRow failed:", err)
 			} else {
-				log.Println(tag.String())
+				log.Println(name, hb, token, writer)
 			}
 		}()
 	}
