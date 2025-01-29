@@ -9,11 +9,29 @@ import (
 	"time"
 
 	clockbound "github.com/flowerinthenight/clockbound-ffi-go"
+	"github.com/jackc/pgx/v5"
 )
 
 func main() {
-	client := clockbound.New()
+	log.Println("args:", os.Args)
 
+	if false {
+		pgctx := context.Background()
+		conn, err := pgx.Connect(pgctx, os.Getenv("DATABASE_URL"))
+		if err != nil {
+			log.Println("Connect failed:", err)
+			return
+		}
+
+		err = conn.Ping(pgctx)
+		if err != nil {
+			log.Println("Ping failed:", err)
+		}
+
+		defer conn.Close(pgctx)
+	}
+
+	client := clockbound.New()
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan error, 1)
 	ticker := time.NewTicker(time.Second * 3)
