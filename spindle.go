@@ -183,14 +183,12 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 
 		// Attempt first ever lock. Only one node should be able to do this successfully.
 		if initial.Load() == 1 {
-			l.logger.Printf("do first ever lock")
 			prefix := "init:"
 			now, err := l.cb.Now()
 			if err != nil {
 				l.logger.Printf("%v Now failed (info only): %v", prefix, err)
 			}
 
-			l.logger.Printf("after now")
 			mt := middleTime(now)
 			var q strings.Builder
 			fmt.Fprintf(&q, "insert into %s ", l.table)
@@ -382,15 +380,22 @@ func (l *Lock) checkLock() (uint64, int64, error) {
 	var diff int64
 
 	err := func() error {
+		now, err := l.cb.Now()
+		if err != nil {
+			l.logger.Printf("[checkLock] Now failed (id=%v): %v", l.id, err)
+			return fmt.Errorf("Now failed: %w", err)
+		}
+
+		mt := middleTime(now)
 		var q strings.Builder
 		fmt.Fprintf(&q, "select ")
-		fmt.Fprintf(&q, "extract(milliseconds from (token - heartbeat)) as diff, ")
+		fmt.Fprintf(&q, "extract(milliseconds from ($1 - heartbeat)) as diff, ")
 		fmt.Fprintf(&q, "token ")
 		fmt.Fprintf(&q, "from %s ", l.table)
-		fmt.Fprintf(&q, "where name = $1")
+		fmt.Fprintf(&q, "where name = $2")
 		var rawDiff string
 		var tokenTime time.Time
-		reterr := l.db.QueryRow(q.String(), l.name).Scan(&rawDiff, &tokenTime)
+		reterr := l.db.QueryRow(q.String(), mt, l.name).Scan(&rawDiff, &tokenTime)
 		if reterr == nil {
 			v, err := strconv.ParseFloat(rawDiff, 64)
 			if err != nil {
