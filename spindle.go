@@ -257,9 +257,8 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 
 				l.setToken(&mt) // doesn't mean we're leader
 				l.logger.Printf("%v got the lock with token %v", prefix, l.token())
-			} else {
-				// TODO: Can remove else section.
-				l.logger.Printf("%v Exec failed (info only): %v", prefix, err)
+
+				l.logger.Printf("%v dbg: token=%v, l.token=%v", prefix, xxhash.Sum64String(mt.Format(time.RFC3339Nano)), l.token())
 			}
 		}
 	}
