@@ -38,7 +38,7 @@ func main() {
 	lock := spindle.New(db,
 		*table,
 		*name,
-		spindle.WithDuration(10000),
+		spindle.WithDuration(5000),
 		spindle.WithLeaderCallback(nil, func(d interface{}, m []byte) {
 			log.Println("callback:", string(m))
 		}),
