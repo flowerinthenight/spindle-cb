@@ -4,7 +4,7 @@
 
 A port of [spindle](https://github.com/flowerinthenight/spindle) using [aws/clock-bound](https://github.com/aws/clock-bound), and PostreSQL for storage. Using this library requires [CGO](https://pkg.go.dev/cmd/cgo) due to its usage of [clockbound-ffi-go](https://github.com/flowerinthenight/clockbound-ffi-go).
 
-To create the database and table (`locktable` is just an example):
+To create the database and table (`spindle` and `locktable` are just examples):
 
 ```
 CREATE DATABASE spindle;
