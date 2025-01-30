@@ -350,7 +350,7 @@ func (l *Lock) token() uint64 {
 		return 0
 	}
 
-	l.logger.Printf("local_unix: %v", (*l.ttoken).UnixMicro())
+	l.logger.Printf("local_unix: %v, rfc3339=%v", (*l.ttoken).UnixMicro(), (*l.ttoken).Format(time.RFC3339))
 
 	v := (*l.ttoken).UTC().Format(time.RFC3339)
 	return xxhash.Sum64String(v)
