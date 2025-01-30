@@ -67,12 +67,12 @@ func (w withLogger) Apply(o *Lock) { o.logger = w.l }
 func WithLogger(v *log.Logger) Option { return withLogger{v} }
 
 type Lock struct {
-	db       *sql.DB
-	cb       *clockbound.Client
-	table    string // table name
-	name     string // lock name
-	id       string // unique id for this instance
-	duration int64  // lock duration in ms
+	cb       *clockbound.Client // clockbound client
+	db       *sql.DB            // assumed postgres
+	table    string             // table name
+	name     string             // lock name
+	id       string             // unique id for this instance
+	duration int64              // lock duration in ms
 	iter     atomic.Int64
 	ttoken   *time.Time
 	mtx      *sync.Mutex
@@ -126,6 +126,7 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 		// See if there is an active leased lock (could be us, could be someone else).
 		token, diff, err := l.checkLock()
 		if err != nil {
+			// NOTE: Not the same as spindle.
 			return false // lock available
 		}
 
@@ -183,12 +184,8 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 		// Attempt first ever lock. Only one node should be able to do this successfully.
 		if initial.Load() == 1 {
 			prefix := "init:"
-			now, err := l.cb.Now()
-			if err != nil {
-				l.logger.Printf("%v Now failed (info only): %v", prefix, err)
-			}
-
-			mt := middleTime(now)
+			now, _ := l.cb.Now()
+			mt := midTime(now)
 			var q strings.Builder
 			fmt.Fprintf(&q, "insert into %s ", l.table)
 			fmt.Fprintf(&q, "(name, heartbeat, token, writer) ")
@@ -197,7 +194,7 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 			fmt.Fprintf(&q, "$1,")
 			fmt.Fprintf(&q, "$2,")
 			fmt.Fprintf(&q, "'%s')", l.id)
-			_, err = l.db.Exec(q.String(), mt, mt)
+			_, err := l.db.Exec(q.String(), mt, mt)
 			if err == nil {
 				l.setToken(&mt)
 				l.logger.Printf("%v got the lock with token %v", prefix, l.token())
@@ -222,12 +219,8 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 			}
 
 			// Attempt to grab the next lock. Multiple nodes could potentially do this successfully.
-			now, err := l.cb.Now()
-			if err != nil {
-				l.logger.Printf("%v Now failed (info only): %v", prefix, err)
-			}
-
-			mt := middleTime(now)
+			now, _ := l.cb.Now()
+			mt := midTime(now)
 			nxt := fmt.Sprintf("%v_%v", l.name, token)
 			var q strings.Builder
 			fmt.Fprintf(&q, "insert into %s ", l.table)
@@ -372,12 +365,8 @@ func (l *Lock) checkLock() (uint64, int64, error) {
 	var diff int64
 
 	err := func() error {
-		now, err := l.cb.Now()
-		if err != nil {
-			return fmt.Errorf("Now failed: %w", err)
-		}
-
-		mt := middleTime(now)
+		now, _ := l.cb.Now()
+		mt := midTime(now)
 		var q strings.Builder
 		fmt.Fprintf(&q, "select ")
 		fmt.Fprintf(&q, "extract(milliseconds from ($1 - heartbeat)) as diff, ")
@@ -420,19 +409,12 @@ func (l *Lock) getCurrentToken() (uint64, string, error) {
 
 func (l *Lock) heartbeat() {
 	func() {
-		now, err := l.cb.Now()
-		if err != nil {
-			l.logger.Printf("[hb] Now failed (id=%v): %v", l.id, err)
-		}
-
+		now, _ := l.cb.Now()
 		var q strings.Builder
 		fmt.Fprintf(&q, "update %s ", l.table)
 		fmt.Fprintf(&q, "set heartbeat = $1 ")
 		fmt.Fprintf(&q, "where name = $2")
-		_, err = l.db.Exec(q.String(), now.Earliest, l.name)
-		if err != nil {
-			l.logger.Printf("[hb] Now failed (id=%v): %v", l.id, err)
-		}
+		l.db.Exec(q.String(), now.Earliest, l.name)
 	}()
 
 	func() {
@@ -472,6 +454,6 @@ func New(db *sql.DB, table, name string, o ...Option) *Lock {
 	return lock
 }
 
-func middleTime(now clockbound.Now) time.Time {
+func midTime(now clockbound.Now) time.Time {
 	return now.Earliest.Add(now.Latest.Sub(now.Earliest) / 2)
 }
