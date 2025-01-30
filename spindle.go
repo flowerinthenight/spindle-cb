@@ -373,17 +373,17 @@ func (l *Lock) checkLock() (uint64, int64, error) {
 		fmt.Fprintf(&q, "token ")
 		fmt.Fprintf(&q, "from %s ", l.table)
 		fmt.Fprintf(&q, "where name = $2")
-		var rawDiff string
-		var tokenTime time.Time
-		re := l.db.QueryRow(q.String(), mt, l.name).Scan(&rawDiff, &tokenTime)
+		var rdiff string
+		var rtime time.Time
+		re := l.db.QueryRow(q.String(), mt, l.name).Scan(&rdiff, &rtime)
 		if re == nil {
-			v, pe := strconv.ParseFloat(rawDiff, 64)
+			v, pe := strconv.ParseFloat(rdiff, 64)
 			if pe != nil {
 				l.logger.Printf("ParseFloat failed: %v", pe)
 			}
 
 			diff = int64(v)
-			token = fmt.Sprintf("%d", tokenTime.UnixMicro())
+			token = fmt.Sprintf("%d", rtime.UnixMicro())
 		}
 
 		return re
