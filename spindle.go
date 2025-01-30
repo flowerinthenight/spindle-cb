@@ -126,11 +126,8 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 		// See if there is an active leased lock (could be us, could be someone else).
 		token, diff, err := l.checkLock()
 		if err != nil {
-			l.logger.Printf("checkLock failed (id=%v): %v", l.id, err)
-			return false
+			return false // lock available
 		}
-
-		l.logger.Printf("[locked] l.token=%v, token=%v", l.token(), token)
 
 		if l.token() == token {
 			leader.Add(1)
@@ -201,10 +198,6 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 			fmt.Fprintf(&q, "$2,")
 			fmt.Fprintf(&q, "'%s')", l.id)
 			_, err = l.db.Exec(q.String(), mt, mt)
-			if err != nil {
-				l.logger.Printf("%v Exec failed (info only): %v", prefix, err)
-			}
-
 			if err == nil {
 				l.setToken(&mt)
 				l.logger.Printf("%v got the lock with token %v", prefix, l.token())
@@ -257,12 +250,6 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 
 				l.setToken(&mt) // doesn't mean we're leader
 				l.logger.Printf("%v got the lock with token %v", prefix, l.token())
-
-				l.logger.Printf("%v dbg: tm=%v token=%v, l.token=%v",
-					prefix,
-					mt.UTC().Format(time.RFC3339),
-					xxhash.Sum64String(mt.Format(time.RFC3339)),
-					l.token())
 			}
 		}
 	}
@@ -387,7 +374,6 @@ func (l *Lock) checkLock() (uint64, int64, error) {
 	err := func() error {
 		now, err := l.cb.Now()
 		if err != nil {
-			l.logger.Printf("[checkLock] Now failed (id=%v): %v", l.id, err)
 			return fmt.Errorf("Now failed: %w", err)
 		}
 
@@ -400,20 +386,18 @@ func (l *Lock) checkLock() (uint64, int64, error) {
 		fmt.Fprintf(&q, "where name = $2")
 		var rawDiff string
 		var tokenTime time.Time
-		reterr := l.db.QueryRow(q.String(), mt, l.name).Scan(&rawDiff, &tokenTime)
-		if reterr == nil {
-			v, err := strconv.ParseFloat(rawDiff, 64)
-			if err != nil {
-				l.logger.Printf("ParseFloat failed: %v", err)
+		re := l.db.QueryRow(q.String(), mt, l.name).Scan(&rawDiff, &tokenTime)
+		if re == nil {
+			v, pe := strconv.ParseFloat(rawDiff, 64)
+			if pe != nil {
+				l.logger.Printf("ParseFloat failed: %v", pe)
 			}
 
 			diff = int64(v)
 			token = tokenTime.UTC().Format(time.RFC3339)
-
-			l.logger.Printf("dbg: checkLock time: %v", token)
 		}
 
-		return reterr
+		return re
 	}()
 
 	return xxhash.Sum64String(token), diff, err
@@ -447,7 +431,7 @@ func (l *Lock) heartbeat() {
 		fmt.Fprintf(&q, "where name = $2")
 		_, err = l.db.Exec(q.String(), now.Earliest, l.name)
 		if err != nil {
-			l.logger.Printf("heartbeat failed (id=%v): %v", l.id, err)
+			l.logger.Printf("[hb] Now failed (id=%v): %v", l.id, err)
 		}
 	}()
 
@@ -456,11 +440,7 @@ func (l *Lock) heartbeat() {
 		rm := fmt.Sprintf("%v_", l.name)
 		fmt.Fprintf(&q, "delete from %s ", l.table)
 		fmt.Fprintf(&q, "where starts_with(name, '%s')", rm)
-		_, err := l.db.Exec(q.String())
-		if err != nil {
-			// TODO: Can be removed.
-			l.logger.Printf("hb/cleanup failed (id=%v): %v", l.id, err)
-		}
+		l.db.Exec(q.String()) // best-effort
 	}()
 }
 
