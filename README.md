@@ -28,9 +28,9 @@ After instantiating the lock object, you will call the `Run(...)` function which
 
 ```go
 import (
-    ...
-    "github.com/flowerinthenight/spindle-cb"
-    _ "github.com/jackc/pgx/v5/stdlib"
+  ...
+  "github.com/flowerinthenight/spindle-cb"
+  _ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func main() {
