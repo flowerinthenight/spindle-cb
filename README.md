@@ -7,7 +7,9 @@ A port of [spindle](https://github.com/flowerinthenight/spindle) using [aws/cloc
 
 Using this library requires [CGO](https://pkg.go.dev/cmd/cgo) due to its usage of [clockbound-ffi-go](https://github.com/flowerinthenight/clockbound-ffi-go).
 
-To create the database and table (`spindle` and `locktable` are just examples):
+## Usage
+
+At the moment, the table needs to be created beforehand(`spindle` and `locktable` are just examples):
 
 ```sql
 -- create the database:
@@ -20,6 +22,38 @@ CREATE TABLE locktable (
   token TIMESTAMP,
   writer TEXT
 );
+```
+
+After instantiating the lock object, you will call the `Run(...)` function which will attempt to acquire a named lock at a regular interval (lease duration) until cancelled. A `HasLock()` function is provided which returns true (along with the lock token) if the lock is successfully acquired. Something like:
+
+```go
+import (
+    ...
+    "github.com/flowerinthenight/spindle-cb"
+    _ "github.com/jackc/pgx/v5/stdlib"
+)
+
+func main() {
+  // error checks redacted
+  db, _ := sql.Open("pgx", *dbstr)
+  defer db.Close()
+
+  done := make(chan error, 1) // notify me when done (optional)
+  quit, cancel := context.WithCancel(context.Background()) // for cancel
+    
+  // Create the lock object using a 5s lease duration using 'locktable' above.
+  lock := spindle.New(db, "locktable", "mylock", spindle.WithDuration(5000))
+    
+  lock.Run(quit, done) // start the main loop, async
+
+  time.Sleep(time.Second * 20)
+  locked, token := lock.HasLock()
+  log.Println("HasLock:", locked, token)
+  time.Sleep(time.Second * 20)
+    
+  cancel()
+  <-done
+}
 ```
 
 A sample cloud-init [startup script](./startup-aws-asg.sh) is provided for spinning up an [ASG](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) with the ClockBound daemon already setup.
