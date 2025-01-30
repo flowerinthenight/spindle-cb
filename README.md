@@ -6,9 +6,11 @@ A port of [spindle](https://github.com/flowerinthenight/spindle) using [aws/cloc
 
 To create the database and table (`spindle` and `locktable` are just examples):
 
-```
+```sql
+-- create the database
 CREATE DATABASE spindle;
 
+-- create the table
 CREATE TABLE locktable (
   name TEXT PRIMARY KEY,
 	heartbeat TIMESTAMP,
