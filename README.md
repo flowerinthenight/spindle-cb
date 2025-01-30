@@ -58,3 +58,7 @@ $ tar xvzf spindle-{version}-x86_64-linux.tar.gz
 # Run multiple instances of `example` to see locking taking place:
 $ ./example -db postgres://postgres:pass@loc.rds.amazonaws.com:5432/spindle
 ```
+
+## License
+
+This library is licensed under the [Apache License 2.0](./LICENSE).
