@@ -1,4 +1,4 @@
-A port of [spindle](https://github.com/flowerinthenight/spindle) using [AWS ClockBound](https://github.com/aws/clock-bound).
+A port of [spindle](https://github.com/flowerinthenight/spindle) using [aws/clock-bound](https://github.com/aws/clock-bound).
 
 ```sh
 # Create a launch template. ImageId here is Amazon Linux, default VPC.
