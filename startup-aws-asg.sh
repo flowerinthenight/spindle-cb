@@ -41,9 +41,6 @@ cp -v /clock-bound/clock-bound-ffi/include/clockbound.h /usr/include/
 cp -v /clock-bound/target/release/libclockbound.a /usr/lib/
 cp -v /clock-bound/target/release/libclockbound.so /usr/lib/
 
-wget https://github.com/flowerinthenight/spindle-cb/releases/download/v0.1.5/spindle-v0.1.5-x86_64-linux.tar.gz
-tar -xzvf spindle-v0.1.5-x86_64-linux.tar.gz
 METADATA_TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
 INTERNAL_IP=$(curl -H "X-aws-ec2-metadata-token: $METADATA_TOKEN" http://169.254.169.254/latest/meta-data/local-ipv4)
 echo "internal-ip: $INTERNAL_IP"
-./spindle-cb 2>&1 | logger &
