@@ -1,4 +1,5 @@
 [![main](https://github.com/flowerinthenight/spindle-cb/actions/workflows/main.yml/badge.svg)](https://github.com/flowerinthenight/spindle-cb/actions/workflows/main.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/flowerinthenight/spindle-cb.svg)](https://pkg.go.dev/github.com/flowerinthenight/spindle-cb)
 
 ## spindle-cb
 
