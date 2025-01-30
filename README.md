@@ -15,7 +15,7 @@ $ aws ec2 create-launch-template \
     "InstanceType":"t2.micro",
   }'
 
-# Create the ASG:
+# Create the ASG; update {target-zone} with actual value:
 $ aws autoscaling create-auto-scaling-group \
   --auto-scaling-group-name spindle-asg \
   --launch-template LaunchTemplateName=spindle-lt,Version='1' \
@@ -24,6 +24,13 @@ $ aws autoscaling create-auto-scaling-group \
   --tags Key=Name,Value=spindle-asg \
   --availability-zones {target-zone}
 
-# You can view the logs through:
-$ [sudo] journalctl -f
+# You can now SSH to the instance. Note that it might take some time before
+# ClockBound is running due to the need to build it in Rust. You can wait
+# for the `clockbound` process, or tail the startup script output, like so:
+$ tail -f /var/log/cloud-init-output.log
+
+# Run the sample code:
+# Download the latest release sample from GitHub.
+$ tar xvzf spindle-{version}-x86_64-linux.tar.gz
+$ ./example -db {PG_DSN}
 ```
