@@ -350,6 +350,8 @@ func (l *Lock) token() uint64 {
 		return 0
 	}
 
+	l.logger.Printf("local_unix: %v", (*l.ttoken).UnixNano())
+
 	v := (*l.ttoken).UTC().Format(time.RFC3339)
 	return xxhash.Sum64String(v)
 }
@@ -384,6 +386,7 @@ func (l *Lock) checkLock() (uint64, int64, error) {
 
 			diff = int64(v)
 			token = tokenTime.UTC().Format(time.RFC3339)
+			l.logger.Printf("token_unix: %v", tokenTime.UnixNano())
 		}
 
 		return re
