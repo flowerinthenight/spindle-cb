@@ -20,8 +20,6 @@ func main() {
 	flag.Parse()
 
 	// To run, update the database name, table name, and, optionally, the lock name.
-	// It is assumed that your environment is able to authenticate to Spanner via
-	// GOOGLE_APPLICATION_CREDENTIALS environment variable.
 	db, err := sql.Open("pgx", *dbstr)
 	if err != nil {
 		log.Println("Open failed:", err)
