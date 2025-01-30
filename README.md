@@ -49,5 +49,5 @@ $ tail -f /var/log/cloud-init-output.log
 # Run the sample code:
 # Download the latest release sample from GitHub.
 $ tar xvzf spindle-{version}-x86_64-linux.tar.gz
-$ ./example -db {PG_DSN}
+$ ./example -db postgres://postgres:pass@loc.rds.amazonaws.com:5432/spindle
 ```
