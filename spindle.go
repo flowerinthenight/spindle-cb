@@ -260,8 +260,8 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 
 				l.logger.Printf("%v dbg: tm=%v token=%v, l.token=%v",
 					prefix,
-					mt.UTC().Format(time.RFC3339Nano),
-					xxhash.Sum64String(mt.Format(time.RFC3339Nano)),
+					mt.UTC().Format(time.RFC3339),
+					xxhash.Sum64String(mt.Format(time.RFC3339)),
 					l.token())
 			}
 		}
@@ -370,7 +370,7 @@ func (l *Lock) token() uint64 {
 		return 0
 	}
 
-	v := (*l.ttoken).UTC().Format(time.RFC3339Nano)
+	v := (*l.ttoken).UTC().Format(time.RFC3339)
 	return xxhash.Sum64String(v)
 }
 
@@ -408,7 +408,7 @@ func (l *Lock) checkLock() (uint64, int64, error) {
 			}
 
 			diff = int64(v)
-			token = tokenTime.UTC().Format(time.RFC3339Nano)
+			token = tokenTime.UTC().Format(time.RFC3339)
 
 			l.logger.Printf("dbg: checkLock time: %v", token)
 		}
@@ -430,7 +430,7 @@ func (l *Lock) getCurrentToken() (uint64, string, error) {
 		return 0, writer, err
 	}
 
-	ts := token.Format(time.RFC3339Nano)
+	ts := token.Format(time.RFC3339)
 	return xxhash.Sum64String(ts), writer, nil
 }
 
