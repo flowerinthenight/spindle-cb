@@ -127,8 +127,10 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 		token, diff, err := l.checkLock()
 		if err != nil {
 			l.logger.Printf("checkLock failed (id=%v): %v", l.id, err)
-			// return true // err on safer side
+			return true // err on safer side
 		}
+
+		l.logger.Printf("[locked] l.token=%v, token=%v", l.token(), token)
 
 		if l.token() == token {
 			leader.Add(1)
