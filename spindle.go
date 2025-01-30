@@ -260,7 +260,7 @@ func (l *Lock) Run(ctx context.Context, done ...chan error) error {
 
 				l.logger.Printf("%v dbg: tm=%v token=%v, l.token=%v",
 					prefix,
-					mt.UTC().Format(time.RFC3339),
+					mt.UTC().Format(time.RFC3339Nano),
 					xxhash.Sum64String(mt.Format(time.RFC3339Nano)),
 					l.token())
 			}
