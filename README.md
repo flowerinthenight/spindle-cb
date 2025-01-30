@@ -1,4 +1,4 @@
-A port of [spindle](https://github.com/flowerinthenight/spindle) using [aws/clock-bound](https://github.com/aws/clock-bound).
+A port of [spindle](https://github.com/flowerinthenight/spindle) using [aws/clock-bound](https://github.com/aws/clock-bound). Using this library requires CGO due to its usage of [clockbound-ffi-go](https://github.com/flowerinthenight/clockbound-ffi-go).
 
 ```sh
 # Create a launch template. ImageId here is Amazon Linux, default VPC.
