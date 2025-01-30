@@ -10,15 +10,15 @@ Using this library requires [CGO](https://pkg.go.dev/cmd/cgo) due to its usage o
 To create the database and table (`spindle` and `locktable` are just examples):
 
 ```sql
--- create the database
+-- create the database:
 CREATE DATABASE spindle;
 
--- create the table
+-- create the table:
 CREATE TABLE locktable (
   name TEXT PRIMARY KEY,
-	heartbeat TIMESTAMP,
-	token TIMESTAMP,
-	writer TEXT
+  heartbeat TIMESTAMP,
+  token TIMESTAMP,
+  writer TEXT
 );
 ```
 
