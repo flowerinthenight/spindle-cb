@@ -1,6 +1,6 @@
 A port of [spindle](https://github.com/flowerinthenight/spindle) using [aws/clock-bound](https://github.com/aws/clock-bound). Using this library requires [CGO](https://pkg.go.dev/cmd/cgo) due to its usage of [clockbound-ffi-go](https://github.com/flowerinthenight/clockbound-ffi-go).
 
-A cloud-init [startup script](./startup-aws-asg.sh) is also provided for spinning up an [ASG](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) with the ClockBound daemon already setup.
+A sample cloud-init [startup script](./startup-aws-asg.sh) is provided for spinning up an [ASG](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) with the ClockBound daemon already setup.
 
 ```sh
 # Create a launch template. ImageId here is Amazon Linux, default VPC.
