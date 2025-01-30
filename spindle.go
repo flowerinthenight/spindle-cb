@@ -350,9 +350,7 @@ func (l *Lock) token() uint64 {
 		return 0
 	}
 
-	l.logger.Printf("local_unix: %v, rfc3339=%v", (*l.ttoken).UnixMicro(), (*l.ttoken).Format(time.RFC3339))
-
-	v := (*l.ttoken).UTC().Format(time.RFC3339)
+	v := fmt.Sprintf("%d", (*l.ttoken).UnixMicro())
 	return xxhash.Sum64String(v)
 }
 
@@ -385,8 +383,7 @@ func (l *Lock) checkLock() (uint64, int64, error) {
 			}
 
 			diff = int64(v)
-			token = tokenTime.UTC().Format(time.RFC3339)
-			l.logger.Printf("token_unix: %v", tokenTime.UnixMicro())
+			token = fmt.Sprintf("%d", tokenTime.UnixMicro())
 		}
 
 		return re
@@ -406,7 +403,7 @@ func (l *Lock) getCurrentToken() (uint64, string, error) {
 		return 0, writer, err
 	}
 
-	ts := token.Format(time.RFC3339)
+	ts := fmt.Sprintf("%d", token.UnixMicro())
 	return xxhash.Sum64String(ts), writer, nil
 }
 
