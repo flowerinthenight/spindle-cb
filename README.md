@@ -61,4 +61,4 @@ $ ./example -db postgres://postgres:pass@loc.rds.amazonaws.com:5432/spindle
 
 ## License
 
-This library is licensed under the [Apache License 2.0](./LICENSE).
+This library is licensed under the [Apache 2.0 License](./LICENSE).
