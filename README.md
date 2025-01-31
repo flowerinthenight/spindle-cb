@@ -93,6 +93,10 @@ $ tar xvzf spindle-{version}-x86_64-linux.tar.gz
 $ ./example -db postgres://postgres:pass@loc.rds.amazonaws.com:5432/spindle
 ```
 
+<p align="left">
+  <img src="./assets/spindle-cb.jpg" width="560" title="spindle">
+</p>
+
 ## License
 
 This library is licensed under the [Apache 2.0 License](./LICENSE).
