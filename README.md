@@ -3,9 +3,9 @@
 
 ## spindle-cb
 
-An AWS-native, distributed locking library (port of [spindle](https://github.com/flowerinthenight/spindle)) using [aws/clock-bound](https://github.com/aws/clock-bound), and PostgreSQL (storage).
+A distributed locking library (port of [spindle](https://github.com/flowerinthenight/spindle)) using [aws/clock-bound](https://github.com/aws/clock-bound), and PostgreSQL (storage).
 
-Using this library requires the [ClockBound daemon](https://github.com/aws/clock-bound/tree/main/clock-bound-d), and [CGO](https://pkg.go.dev/cmd/cgo) due to its usage of the [clockbound-ffi-go](https://github.com/flowerinthenight/clockbound-ffi-go) library.
+Using this library requires the [ClockBound daemon](https://github.com/aws/clock-bound/tree/main/clock-bound-d) (making it AWS-only), and [CGO](https://pkg.go.dev/cmd/cgo) due to its usage of the [clockbound-ffi-go](https://github.com/flowerinthenight/clockbound-ffi-go) library.
 
 ## Usage
 
