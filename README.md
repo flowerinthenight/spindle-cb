@@ -3,7 +3,7 @@
 
 ## spindle-cb
 
-A port of [spindle](https://github.com/flowerinthenight/spindle) using [aws/clock-bound](https://github.com/aws/clock-bound), and PostgreSQL (storage).
+A distributed locking library (port of [spindle](https://github.com/flowerinthenight/spindle)) using [aws/clock-bound](https://github.com/aws/clock-bound), and PostgreSQL (storage).
 
 Using this library requires [CGO](https://pkg.go.dev/cmd/cgo) due to its usage of [clockbound-ffi-go](https://github.com/flowerinthenight/clockbound-ffi-go).
 
@@ -24,7 +24,7 @@ CREATE TABLE locktable (
 );
 ```
 
-After instantiating the lock object, you will call the `Run(...)` function which will attempt to acquire a named lock at a regular interval (lease duration) until cancelled. A `HasLock()` function is provided which returns true (along with the lock token) if the lock is successfully acquired. Something like:
+After creating the lock object, you will call the `Run(...)` function which will attempt to acquire a named lock at a regular interval (lease duration) until cancelled. A `HasLock()` function is provided which returns true (along with the lock token) if the lock is successfully acquired. Something like:
 
 ```go
 import (
