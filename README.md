@@ -96,7 +96,7 @@ $ ./example -db postgres://postgres:pass@loc.rds.amazonaws.com:5432/spindle
 Sample output:
 
 <p align="left">
-  <img src="./assets/spindle-cb.jpg" title="spindle">
+  <img src="./assets/spindle-cb.png" title="spindle">
 </p>
 
 ## License
