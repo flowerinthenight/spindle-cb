@@ -35,12 +35,6 @@ systemctl enable clockbound
 systemctl start clockbound
 systemctl status clockbound
 
-cd /clock-bound/clock-bound-ffi/
-/root/.cargo/bin/cargo build --release
-cp -v /clock-bound/clock-bound-ffi/include/clockbound.h /usr/include/
-cp -v /clock-bound/target/release/libclockbound.a /usr/lib/
-cp -v /clock-bound/target/release/libclockbound.so /usr/lib/
-
 METADATA_TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
 INTERNAL_IP=$(curl -H "X-aws-ec2-metadata-token: $METADATA_TOKEN" http://169.254.169.254/latest/meta-data/local-ipv4)
 echo "internal-ip: $INTERNAL_IP"
