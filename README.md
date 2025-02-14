@@ -40,21 +40,23 @@ func main() {
 
     done := make(chan error, 1) // notify me when done (optional)
     quit, cancel := context.WithCancel(context.Background()) // for cancel
-    
+
     // Create the lock object using a 5s lease duration using 'locktable' above.
     lock := spindle.New(db, "locktable", "mylock", spindle.WithDuration(5000))
-    
+
     lock.Run(quit, done) // start the main loop, async
 
     time.Sleep(time.Second * 20)
     locked, token := lock.HasLock()
     log.Println("HasLock:", locked, token)
     time.Sleep(time.Second * 20)
-    
+
     cancel()
     <-done
 }
 ```
+
+## Running the sample
 
 A sample cloud-init [startup script](./startup-aws-asg.sh) is provided for spinning up an [Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) with the ClockBound daemon already setup and running.
 
