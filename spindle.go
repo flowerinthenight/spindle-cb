@@ -22,7 +22,7 @@ var (
 	ErrNotRunning = fmt.Errorf("spindle: not running")
 )
 
-type FnLeaderCallback func(data interface{}, msg []byte)
+type FnLeaderCallback func(data any, msg []byte)
 
 type Option interface {
 	Apply(*Lock)
@@ -43,7 +43,7 @@ func (w withDuration) Apply(o *Lock) { o.duration = int64(w) }
 func WithDuration(v int64) Option { return withDuration(v) }
 
 type withLeaderCallback struct {
-	d interface{}
+	d any
 	h FnLeaderCallback
 }
 
@@ -55,7 +55,7 @@ func (w withLeaderCallback) Apply(o *Lock) {
 // WithLeaderCallback sets the node's callback function when it a
 // leader is selected (or deselected). The msg arg for h will be
 // set to either 0 or 1.
-func WithLeaderCallback(d interface{}, h FnLeaderCallback) Option {
+func WithLeaderCallback(d any, h FnLeaderCallback) Option {
 	return withLeaderCallback{d, h}
 }
 
@@ -80,7 +80,7 @@ type Lock struct {
 	active   atomic.Int32
 
 	cbLeader     FnLeaderCallback // leader callback
-	cbLeaderData interface{}      // arbitrary data passed to fnLeader
+	cbLeaderData any              // arbitrary data passed to fnLeader
 }
 
 // Run starts the main lock loop which can be canceled using the input context. You can
