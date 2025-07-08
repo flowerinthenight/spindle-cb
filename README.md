@@ -9,7 +9,7 @@ Using this library requires the [ClockBound daemon](https://github.com/aws/clock
 
 ## Usage
 
-At the moment, the table needs to be created beforehand(`spindle` and `locktable` are just examples):
+At the moment, the table needs to be created beforehand (`spindle` and `locktable` are just examples):
 
 ```sql
 -- create the database:
