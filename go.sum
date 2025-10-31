@@ -3,8 +3,8 @@ github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XL
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/flowerinthenight/clockbound-ffi-go v0.1.11 h1:EEHZoJNntqFaRdHmQzn+PNUrmhKSxbliQuJF5Uk4/3k=
-github.com/flowerinthenight/clockbound-ffi-go v0.1.11/go.mod h1:LPrvpfRydmfYw2suB0iWoIWO7i65RjxQ30fF7/v3s1U=
+github.com/flowerinthenight/clockbound-ffi-go v0.1.30 h1:mTxHuWF93IgA2F7sR8j3VsrlNqDgH59S0WUjevhjL6E=
+github.com/flowerinthenight/clockbound-ffi-go v0.1.30/go.mod h1:LPrvpfRydmfYw2suB0iWoIWO7i65RjxQ30fF7/v3s1U=
 github.com/go-logr/logr v1.4.3 h1:CjnDlHq8ikf6E492q6eKboGOC0T8CDaOvkHCIg8idEI=
 github.com/go-logr/logr v1.4.3/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
 github.com/go-logr/stdr v1.2.2 h1:hSWxHoqTgW2S2qGc0LTAI563KZ5YKYRhT3MFKZMbjag=
