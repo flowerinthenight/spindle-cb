@@ -7,7 +7,7 @@ A distributed locking library (port of [spindle](https://github.com/flowerinthen
 
 Using this library requires the [ClockBound daemon](https://github.com/aws/clock-bound/tree/main/clock-bound-d) (making it AWS-only), and [CGO](https://pkg.go.dev/cmd/cgo), due to its dependency on the [clockbound-ffi-go](https://github.com/flowerinthenight/clockbound-ffi-go) library.
 
-One use case for this library is [leader election](https://en.wikipedia.org/wiki/Leader_election). If you want one host/node/pod to be the leader within a cluster/group, you can achieve that with this library. When the leader fails, it will fail over to another host/node/pod within a specific timeout. That said, you might want to check out [hedge](https://github.com/flowerinthenight/hedge-cb/), which is a memberlist tracking library built on top of this library.
+One use case for this library is [leader election](https://en.wikipedia.org/wiki/Leader_election). If you want one host/node/pod to be the leader within a cluster/group, you can achieve that with this library. When the leader fails, it will fail over to another host/node/pod within a specific timeout. That said, you might want to check out [hedge-cb](https://github.com/flowerinthenight/hedge-cb/), which is a memberlist tracking library built on top of this library.
 
 ## Usage
 
