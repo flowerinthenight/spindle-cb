@@ -4,7 +4,7 @@ go 1.24.0
 
 require (
 	github.com/cespare/xxhash/v2 v2.3.0
-	github.com/flowerinthenight/clockbound-ffi-go v0.1.30
+	github.com/flowerinthenight/clockbound-ffi-go v0.1.31
 	github.com/google/uuid v1.6.0
 	github.com/googleapis/gax-go/v2 v2.15.0
 	github.com/jackc/pgx/v5 v5.7.6
